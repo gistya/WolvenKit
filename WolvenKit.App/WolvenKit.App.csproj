@@ -32,6 +32,12 @@
     </Compile>
   </ItemGroup>
 
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>WolvenKit.IntegrationTests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
   <ItemGroup>
     <Compile Remove="Controllers\Tw3Controller.cs" />
     <Compile Remove="Models\ProjectManagement\Project\Tw3Project.cs" />
