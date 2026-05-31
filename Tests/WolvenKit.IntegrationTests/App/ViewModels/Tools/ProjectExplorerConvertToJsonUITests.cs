@@ -8,12 +8,15 @@ using HandyControl.Tools.Extension;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Octokit;
 using ReactiveUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App.Models.ProjectManagement.Project;
 using WolvenKit.App.Controllers;
+using WolvenKit.App.Factories;
 using WolvenKit.App.Services;
+using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.App.ViewModels.Tools;
 using WolvenKit.Common;
 using WolvenKit.Common.Interfaces;
@@ -34,7 +37,7 @@ public class ProjectExplorerConvertToJsonUITests : IDisposable
     private readonly Cp77Project _project;
     private IHost? _host;
     private ProjectExplorerViewModel? _projectExplorerVm;
-    private IWatcherService? _watcherService;
+    private ProjectExplorerViewModel.WatcherService? _watcherService;
     private ProjectExplorerView? _projectExplorerView;
 
     public ProjectExplorerConvertToJsonUITests()
@@ -58,52 +61,65 @@ public class ProjectExplorerConvertToJsonUITests : IDisposable
         _host = IntegrationTestHost.Create();
         var services = _host.Services;
         services.UseMicrosoftDependencyResolver();
+        var appViewModel = services.GetRequiredService<AppViewModel>();
 
         var resolver = Locator.CurrentMutable;
         resolver.InitializeSplat();
-
-        var archiveManager = services.GetRequiredService<IArchiveManager>();
 
         var settingsManager = services.GetRequiredService<ISettingsManager>();
         var gameDir = ResolveGameDirectory();
         var exePath = Path.Combine(gameDir, "bin", "x64", "Cyberpunk2077.exe");
         settingsManager.CP77ExecutablePath = exePath;
         var gameControllerFactory = services.GetRequiredService<IGameControllerFactory>();
-        var projectManager = services.GetRequiredService<IProjectManager>();
         var controller = gameControllerFactory.GetRed4Controller();
         Assert.NotNull(controller);
 
-        await controller.L
+        _projectExplorerVm = appViewModel.GetToolViewModel<ProjectExplorerViewModel>();
+
+        // Crashes.
+        // _projectExplorerView = services.GetRequiredService<IViewFor<ProjectExplorerViewModel>>() as ProjectExplorerView;
+
+        var projectManager = services.GetRequiredService<IProjectManager>();
         await projectManager.LoadAsync(_project.Location);
 
-        var assetBrowserVm = services.GetRequiredService<AssetBrowserViewModel>();
-        _projectExplorerVm = services.GetRequiredService<ProjectExplorerViewModel>();
-        _watcherService = services.GetRequiredService<IWatcherService>();
-        // _projectExplorerView = services.GetRequiredService<IViewFor<ProjectExplorerViewModel>>() as ProjectExplorerView;
-        // Assert.NotNull(_projectExplorerView);
-        //
-        // _projectExplorerView.DataContext = _projectExplorerVm;
-        _watcherService.WatchProject(_project);
+        var assetBrowserVm = appViewModel.GetToolViewModel<AssetBrowserViewModel>();
+        _projectExplorerVm.StartWatcher_AndLoadProject(_project, false);
+
+        // Not working yet.
+        // Assert.Equal(3, _projectExplorerVm.FileTree.Count);
 
         await assetBrowserVm.LoadAssetBrowser();
-        var folderToPopulate = assetBrowserVm
+        // var rootDir = assetBrowserVm._boundRootNodes.First();
+        // Dictionary<ulong, IGameFile> files = new();
+        // assetBrowserVm.GetFilesRecursive(rootDir, files);
+        // Assert.NotEmpty(files.Values);
+
+        var folderToAdd = assetBrowserVm
             ._boundRootNodes.First()
             .Directories["base"]
             .Directories["base\\animations"]
             .Directories["base\\animations\\anim_motion_database"];
-        assetBrowserVm.LeftSelectedItem = folderToPopulate;
 
-        var key = archiveManager.GetGameFile(new ResourcePath(folderToPopulate.Name)).Key;
-        var archives = archiveManager
-            .Archives
-            .Items
-            .Where(archive => archive.Files.ContainsKey(key));
+        assetBrowserVm.LeftSelectedItem = folderToAdd;
+        assetBrowserVm.BrowseToFolderCommand.Execute(null);
 
-        foreach (var archive in archives)
-        {
-            AddFromArchiveItems.Add(archive);
-        }
+        /*
+         *     internal void MoveToFolder(RedFileSystemModel dir) => LeftSelectedItem = dir;
 
+                internal void MoveToFolder(RedDirectoryViewModel dir) => LeftSelectedItem = dir.GetModel();
+
+                /// <summary>
+                /// Navigates the Asset Browser to the existing file.
+                /// </summary>
+                /// <param name="file"></param>
+                public void ShowFile(FileSystemModel file)
+         */
+
+        // var key = archiveManager.GetGameFile(new ResourcePath(folderToAdd.Name)).Key;
+        // var archives = archiveManager
+        //     .Archives
+        //     .Items
+        //     .Where(archive => archive.Files.ContainsKey(key));
 
         assetBrowserVm.UpdateSearchInArchives();
 
@@ -130,7 +146,7 @@ public class ProjectExplorerConvertToJsonUITests : IDisposable
     {
         try
         {
-            _watcherService?.ForceStop();
+            _watcherService?.UnwatchProject();
             _host?.Dispose();
             if (Directory.Exists(_tempProjectRoot))
                 Directory.Delete(_tempProjectRoot, true);
