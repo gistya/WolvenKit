@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using HandyControl.Tools.Extension;
@@ -100,34 +101,15 @@ public class ProjectExplorerConvertToJsonUITests : IDisposable
             .Directories["base\\animations"]
             .Directories["base\\animations\\anim_motion_database"];
 
-        assetBrowserVm.LeftSelectedItem = folderToAdd;
-        assetBrowserVm.BrowseToFolderCommand.Execute(null);
-
-        /*
-         *     internal void MoveToFolder(RedFileSystemModel dir) => LeftSelectedItem = dir;
-
-                internal void MoveToFolder(RedDirectoryViewModel dir) => LeftSelectedItem = dir.GetModel();
-
-                /// <summary>
-                /// Navigates the Asset Browser to the existing file.
-                /// </summary>
-                /// <param name="file"></param>
-                public void ShowFile(FileSystemModel file)
-         */
-
-        // var key = archiveManager.GetGameFile(new ResourcePath(folderToAdd.Name)).Key;
-        // var archives = archiveManager
-        //     .Archives
-        //     .Items
-        //     .Where(archive => archive.Files.ContainsKey(key));
-
-        assetBrowserVm.UpdateSearchInArchives();
-
-        var iGameFiles = folderToAdd.Files;
-        List<RedFileViewModel> filesToAdd = [];
-        iGameFiles.ToList().ForEach(f => filesToAdd.Add(new RedFileViewModel(f)));
-
-        filesToAdd.ForEach(file => assetBrowserVm.RightItems.Add(file));
+        // Replicate what AssetBrowserView.LeftNavigation_OnSelectionChanged does:
+        // it populates RightItems with both subdirectory entries and direct files.
+        // Checked RedDirectoryViewModel entries are expanded recursively by AddSelectedAsync.
+        assetBrowserVm.RightItems.AddRange(folderToAdd.Directories
+            .Select(h => new RedDirectoryViewModel(h.Value))
+            .OrderBy(el => Regex.Replace(el.Name, @"\d+", n => n.Value.PadLeft(16, '0'))));
+        assetBrowserVm.RightItems.AddRange(folderToAdd.Files
+            .Select(h => new RedFileViewModel(h))
+            .OrderBy(el => Regex.Replace(el.Name, @"\d+", n => n.Value.PadLeft(16, '0'))));
         assetBrowserVm.RightItems.ForEach(item => item.IsChecked = true);
         await assetBrowserVm.AddSelectedAsync();
         Assert.True(_projectExplorerVm!.FileList.Count > 5);
