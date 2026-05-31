@@ -195,7 +195,7 @@ namespace WolvenKit.UnitTests
                 0x01, 0x00, 0x00, 0x00, // Count
                 0xDC, 0x3C, 0x3D, 0x36, 0x1E, 0x00, 0x00, 0x00, // TweakDBID = PhotoModeBackgrounds.bg_new_bg
                 0xE1, 0x79, 0x4E, 0xEA,
-                
+
                 // Queries
                 0x00, 0x00, 0x00, 0x00, // Count
 
@@ -220,15 +220,17 @@ namespace WolvenKit.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Serialize_Db_AddItem_Duplicate_ShouldThrow()
         {
-            using var stream = s_streamManager.GetStream();
-            using var writer = new BinaryWriter(stream);
+            Assert.Throws<ArgumentException>(() =>
+            {
+                using var stream = s_streamManager.GetStream();
+                using var writer = new BinaryWriter(stream);
 
-            var db = new TweakDB();
-            db.Add("FirstItem", (CBool)true);
-            db.Add("FirstItem", (CInt32)500);
+                var db = new TweakDB();
+                db.Add("FirstItem", (CBool)true);
+                db.Add("FirstItem", (CInt32)500);
+            });
         }
 
         [TestMethod]
@@ -242,21 +244,23 @@ namespace WolvenKit.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Serialize_Db_Name_TooLong_ShouldThrow()
         {
-            using var stream = s_streamManager.GetStream();
-            using var writer = new BinaryWriter(stream);
-
-            var db = new TweakDB();
-
-            var name = string.Empty;
-            for (var i = 0; i <= byte.MaxValue; i++)
+            Assert.Throws<ArgumentException>(() =>
             {
-                name += i.ToString();
-            }
+                using var stream = s_streamManager.GetStream();
+                using var writer = new BinaryWriter(stream);
 
-            db.Add(name, (CBool)true);
+                var db = new TweakDB();
+
+                var name = string.Empty;
+                for (var i = 0; i <= byte.MaxValue; i++)
+                {
+                    name += i.ToString();
+                }
+
+                db.Add(name, (CBool)true);
+            });
         }
 
         private static void SerializeAndAssert(List<(IRedType value, byte[] expected)> tests)

@@ -10,7 +10,7 @@ namespace WolvenKit.UnitTests
     {
         private const ulong s_helloWorldHash = 14998808953798625955;
         private const ulong s_semicolonHash = 16982440701406162758;
-        
+
         [TestMethod]
         [DataRow("", 0xcbf29ce484222325UL)]
         [DataRow("a", 0xaf63dc4c8601ec8cUL)]
@@ -104,7 +104,7 @@ namespace WolvenKit.UnitTests
         public void Hasher_Should_Handle_Simple_Cases(string source)
         {
             var hash = FNV1A64HashAlgorithm.HashStringWithoutAliases(source);
-            Assert.AreEqual(hash, s_helloWorldHash);
+            Assert.AreEqual(s_helloWorldHash, hash);
         }
 
         [TestMethod]
@@ -114,7 +114,7 @@ namespace WolvenKit.UnitTests
         public void Hasher_Should_Handle_Semicolon(string source)
         {
             var hash = FNV1A64HashAlgorithm.HashStringWithoutAliases(source);
-            Assert.AreEqual(hash, s_semicolonHash);
+            Assert.AreEqual(s_semicolonHash, hash);
         }
 
         [TestMethod]
@@ -127,7 +127,7 @@ namespace WolvenKit.UnitTests
         public void Hasher_Should_Handle_Real_Life_Examples(string source, ulong expected)
         {
             var hash = FNV1A64HashAlgorithm.HashStringWithoutAliases(source);
-            Assert.AreEqual(hash, expected);
+            Assert.AreEqual(expected, hash);
         }
     }
 }

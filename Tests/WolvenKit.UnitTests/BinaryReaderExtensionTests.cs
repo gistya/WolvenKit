@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Microsoft.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,7 +19,7 @@ namespace WolvenKit.UnitTests
 
         #region Methods
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(new byte[] { 0x00 }, "", DisplayName = "00. Empty string")]
         [DataRow(new byte[] { 0x84, 0x31, 0x36, 0x78, 0x39 }, "16x9", DisplayName = "01. From tweakdb.bin: 16x9")]
         [DataRow(
@@ -89,9 +90,14 @@ namespace WolvenKit.UnitTests
         public void Test_ReadVLQInt32(byte[] input, int expected) => Assert.AreEqual(expected, GetReaderFromByteArray(input).ReadVLQInt32());
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidDataException))]
         [DataRow(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
-        public void Test_ReadVLQInt32_InvalidData(byte[] input) => GetReaderFromByteArray(input).ReadVLQInt32();
+        public void Test_ReadVLQInt32_InvalidData(byte[] input)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                GetReaderFromByteArray(input).ReadVLQInt32();
+            });
+        }
 
 
         [TestMethod]
@@ -109,9 +115,14 @@ namespace WolvenKit.UnitTests
         public void Test_ReadVLQUInt32(byte[] input, uint expected) => Assert.AreEqual(expected, GetReaderFromByteArray(input).ReadVLQUInt32());
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidDataException))]
         [DataRow(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
-        public void Test_ReadVLQUInt32_InvalidData(byte[] input) => GetReaderFromByteArray(input).ReadVLQUInt32();
+        public void Test_ReadVLQUInt32_InvalidData(byte[] input)
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                GetReaderFromByteArray(input).ReadVLQUInt32();
+            });
+        }
 
         #endregion
     }

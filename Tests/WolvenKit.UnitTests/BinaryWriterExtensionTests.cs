@@ -18,7 +18,7 @@ namespace WolvenKit.UnitTests
         #region Methods
 
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("", new byte[] { 0x00 }, DisplayName = "00. Empty string")]
         [DataRow("Reset", new byte[] { 0x85, 0x52, 0x65, 0x73, 0x65, 0x74 }, DisplayName = "01. From tweakdb.bin: Reset")]
         [DataRow(

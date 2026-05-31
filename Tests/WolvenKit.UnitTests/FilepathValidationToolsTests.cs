@@ -11,7 +11,7 @@ namespace WolvenKit.UnitTests
     {
         #region OperatingSystem Tests
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("valid/path/file.txt", true)]
         [DataRow("valid\\path\\file.txt", true)]
         [DataRow("invalid|path.txt", false)]
@@ -28,7 +28,7 @@ namespace WolvenKit.UnitTests
             Assert.AreEqual(expected, FilepathValidationTools.IsOsFilePathValid(path), $"Path: {path}");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("file.txt", true)]
         [DataRow("file|txt", false)]
         [DataRow("folder/file.txt", false)]
@@ -38,7 +38,7 @@ namespace WolvenKit.UnitTests
             Assert.AreEqual(expected, FilepathValidationTools.IsOsFileNameValid(name), $"Name: {name}");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("valid/path/file.txt", "valid\\path\\file.txt")]
         [DataRow("invalid|path.txt", "invalidpath.txt", "")]
         [DataRow("invalid|path.txt", "invalid_path.txt", "_")]
@@ -54,7 +54,7 @@ namespace WolvenKit.UnitTests
             Assert.AreEqual(expected.Replace('\\', Path.DirectorySeparatorChar), result, $"Path: {path}");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("folder/file.txt", "file.txt")]
         [DataRow("file|txt", "filetxt", "")]
         [DataRow("file|txt", "file_txt", "_")]
@@ -67,7 +67,7 @@ namespace WolvenKit.UnitTests
 
         #region Archive Tests
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("valid/path/file.txt", true)]
         [DataRow("VALID/PATH/FILE.TXT", false)] // only lowercase
         [DataRow("path with space/file.txt", false)] // only ValidArchiveCharacters
@@ -78,7 +78,7 @@ namespace WolvenKit.UnitTests
             Assert.AreEqual(expected, FilepathValidationTools.IsArchiveFilePathValid(path), $"Path: {path}");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("file.txt", true)]
         [DataRow("FILE.TXT", false)]
         [DataRow("file name.txt", false)]
@@ -87,7 +87,7 @@ namespace WolvenKit.UnitTests
             Assert.AreEqual(expected, FilepathValidationTools.IsArchiveFileNameValid(name), $"Name: {name}");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Valid/Path With Space/File.txt", "valid\\path_with_space\\file.txt")]
         [DataRow("invalid|char.txt", "invalidchar.txt")]
         [DataRow("path/../file.txt", "path\\file.txt")]
@@ -97,7 +97,7 @@ namespace WolvenKit.UnitTests
             Assert.AreEqual(expected.Replace('\\', Path.DirectorySeparatorChar), result, $"Path: {path}");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("Folder/File Name.txt", "file_name.txt")]
         public void SanitizeArchiveFileName_Tests(string name, string expected)
         {
