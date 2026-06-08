@@ -61,9 +61,9 @@ namespace WolvenKit
 
         public static void InitializeLicenses()
         {
-            const string v_30_2_4 =
-                "NDAwMzEzOEAzMzMwMmUzMDJlMzAzYjMzMzAzYkQ1SXl0dFh1V1FjZ3dzSlo1bDVsT2hMNWZTYnF4SU1ZdjR1bEYvcXhIZGM9";
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(v_30_2_4);
+            const string latest =
+                "Ngo9BigBOggjHTQxAR8/V1JHaF1cXmhPYVF+WmFZfVhgd19HZlZQTGYuP1ZhSXxVdkBhUH9dcXNWQmdVV0Z9XEE=";
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(latest);
         }
 
         public static void InitializeShell(ISettingsManager settingsManager)
