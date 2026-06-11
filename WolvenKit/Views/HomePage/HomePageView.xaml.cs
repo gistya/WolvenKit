@@ -1,8 +1,5 @@
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.Extensions;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.HomePage;
@@ -18,21 +15,14 @@ namespace WolvenKit.Views.HomePage
         {
             InitializeComponent();
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         viewmodel => viewmodel.SelectedIndex,
                         view => view.HomeTabs.SelectedIndex)
-                    .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                         viewModel => viewModel.CloseHomePageCommand,
                         view => view.ToEditorButton)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                         viewModel => viewModel.CheckForUpdatesCommand,
                         view => view.CheckForUpdateButton)
-                    .DisposeWith(disposables);
             });
 
         }
@@ -49,7 +39,7 @@ namespace WolvenKit.Views.HomePage
 
             if (!e.Handled)
             {
-                var mainWindow = (MainView)Locator.Current.GetService<IViewFor<AppViewModel>>();
+                var mainWindow = System.Windows.Application.Current?.MainWindow as MainView;
                 mainWindow?.DragMove();
             }
         }
@@ -59,7 +49,7 @@ namespace WolvenKit.Views.HomePage
             if (e.ClickCount != 2)
             {
                 base.OnMouseLeftButtonDown(e);
-                var mainWindow = (MainView)Locator.Current.GetService<IViewFor<AppViewModel>>();
+                var mainWindow = System.Windows.Application.Current?.MainWindow as MainView;
                 mainWindow?.DragMove();
             }
         }

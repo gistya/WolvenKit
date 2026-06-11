@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 
@@ -24,7 +23,6 @@ namespace WolvenKit.Views.Editors
                 handler => ITextBox.TextChanged += handler,
                 handler => ITextBox.TextChanged -= handler)
                 .Throttle(TimeSpan.FromSeconds(.5))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>
                 {
                     SetIValue(ITextBox.Text);
@@ -34,7 +32,6 @@ namespace WolvenKit.Views.Editors
                 handler => JTextBox.TextChanged += handler,
                 handler => JTextBox.TextChanged -= handler)
                 .Throttle(TimeSpan.FromSeconds(.5))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>
                 {
                     SetJValue(JTextBox.Text);
@@ -44,7 +41,6 @@ namespace WolvenKit.Views.Editors
                 handler => KTextBox.TextChanged += handler,
                 handler => KTextBox.TextChanged -= handler)
                 .Throttle(TimeSpan.FromSeconds(.5))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>
                 {
                     SetKValue(KTextBox.Text);
@@ -54,7 +50,6 @@ namespace WolvenKit.Views.Editors
                 handler => RTextBox.TextChanged += handler,
                 handler => RTextBox.TextChanged -= handler)
                 .Throttle(TimeSpan.FromSeconds(.5))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>
                 {
                     SetRValue(RTextBox.Text);

@@ -1,11 +1,11 @@
-<reactiveUi:ReactiveUserControl
+<UserControl
     x:Class="WolvenKit.Views.Documents.RedDocumentViewMenuBar"
-    x:TypeArguments="documents:RedDocumentViewToolbarModel"
+   
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:reactiveUi="http://reactiveui.net"
+   
     xmlns:documents="clr-namespace:WolvenKit.App.ViewModels.Documents;assembly=WolvenKit.App"
     xmlns:converters="clr-namespace:WolvenKit.Converters"
     xmlns:hc="https://handyorg.github.io/handycontrol"
@@ -1105,4 +1105,4 @@
             SearchStarted="SearchBar_OnSubmit"
             TextChanged="SearchBar_OnTextChanged" />
     </Grid>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

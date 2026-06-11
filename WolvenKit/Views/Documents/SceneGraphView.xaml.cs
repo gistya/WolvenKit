@@ -22,7 +22,6 @@ using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.App.Models;
 using WolvenKit.App.Interaction;
-using Splat;
 using WolvenKit.Views.Dialogs;
 using AdonisUI.Controls;
 using WolvenKit.Core.Interfaces;
@@ -669,7 +668,7 @@ namespace WolvenKit.Views.Documents
 
             try
             {
-                var appViewModel = Locator.Current.GetService<AppViewModel>();
+                var appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
                 if (appViewModel == null) return;
 
                 // Get scene node types
@@ -830,10 +829,9 @@ namespace WolvenKit.Views.Documents
                 return;
             }
 
-            s_globalAppViewModel = Locator.Current.GetService<AppViewModel>();
+            s_globalAppViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
             if (s_globalAppViewModel != null)
             {
-                s_globalAppViewModel.PropertyChanged += OnGlobalAppViewModelPropertyChanged;
                 s_lastActiveDocument = s_globalAppViewModel.ActiveDocument;
                 s_selectionManagerInitialized = true;
             }
@@ -842,7 +840,6 @@ namespace WolvenKit.Views.Documents
         /// <summary>
         /// Global event handler for document switches (handles ALL scene documents)
         /// </summary>
-        private static void OnGlobalAppViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(AppViewModel.ActiveDocument) || s_globalAppViewModel == null)
             {

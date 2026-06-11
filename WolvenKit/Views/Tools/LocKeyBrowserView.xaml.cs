@@ -2,7 +2,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Tools;
 using static WolvenKit.Modkit.RED4.Serialization.Serialization;
 
@@ -11,17 +10,14 @@ namespace WolvenKit.Views.Tools
     /// <summary>
     /// Interaction logic for LocKeyBrowserView.xaml
     /// </summary>
-    public partial class LocKeyBrowserView : ReactiveUserControl<LocKeyBrowserViewModel>
+    public partial class LocKeyBrowserView : System.Windows.Controls.UserControl
     {
         public LocKeyBrowserView()
         {
             InitializeComponent();
-            //this.WhenActivated(disposables =>
             //{
-            //    this.OneWayBind(ViewModel,
             //            viewModel => viewModel.SelectedRecord,
             //            view => view.redTreeView.ItemsSource)
-            //        .DisposeWith(disposables);
             //});
         }
         private void TextBox_KeyEnterUpdate(object sender, KeyEventArgs e)

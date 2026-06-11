@@ -1,15 +1,12 @@
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.Models.ProjectManagement.Project;
 using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs
 {
-    public partial class FolderPathInputDialogView : IViewFor<FolderPathInputDialogViewModel>
+    public partial class FolderPathInputDialogView
     {
         public FolderPathInputDialogView(Cp77Project activeProject, string dialogTitle = "")
         {
@@ -21,18 +18,14 @@ namespace WolvenKit.Views.Dialogs
             ViewModel = new FolderPathInputDialogViewModel(activeProject, dialogTitle);
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.Text,
                         x => x.TextBox.Text)
-                    .DisposeWith(disposables);
             });
         }
 
         public string DialogTitle;
         public FolderPathInputDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (FolderPathInputDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

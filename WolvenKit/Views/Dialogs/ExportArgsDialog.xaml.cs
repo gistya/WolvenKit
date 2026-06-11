@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.App.ViewModels.Exporters;
@@ -9,7 +8,7 @@ using WolvenKit.Views.Exporters;
 
 namespace WolvenKit.Views.Dialogs;
 
-public partial class ExportArgsDialog : ReactiveUserControl<ExportArgsDialogViewModel>
+public partial class ExportArgsDialog : System.Windows.Controls.UserControl
 {
     private readonly PropertyGrid _propertyGrid;
 

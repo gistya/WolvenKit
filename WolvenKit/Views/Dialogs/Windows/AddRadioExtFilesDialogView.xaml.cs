@@ -1,12 +1,9 @@
 using System;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using ReactiveUI;
-using Splat;
 using Syncfusion.UI.Xaml.Grid;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Models.ProjectManagement.Project;
@@ -16,7 +13,7 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class AddRadioExtFilesDialog : IViewFor<AddRadioExtFilesDialogViewModel>
+    public partial class AddRadioExtFilesDialog
     {
         public static bool IsInstanceOpen { get; private set; }
 
@@ -27,43 +24,29 @@ namespace WolvenKit.Views.Dialogs.Windows
             ViewModel = AddRadioExtFilesDialogViewModel.GetInstance(project, templateFileTools);
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.StationName,
                         x => x.StationNameTextBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.IconFilePath,
                         x => x.IconPathTextBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.Frequency,
                         x => x.StationFrequencyTextBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.UseStream,
                         x => x.UseStreamCheckBox.IsChecked)
-                    .DisposeWith(disposables);
 
                 // stream URL
-                this.Bind(ViewModel,
                         x => x.StreamPath,
                         x => x.StreamPathTextBox.Text)
-                    .DisposeWith(disposables);
 
                 // Grid with songs
-                this.Bind(ViewModel,
                         x => x.SongItems,
                         x => x.SongsGrid.ItemsSource)
-                    .DisposeWith(disposables);
 
                 SongsGrid.RowDragDropController.Drop += SongsGrid_OnDrop;
             });
         }
 
         public AddRadioExtFilesDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (AddRadioExtFilesDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

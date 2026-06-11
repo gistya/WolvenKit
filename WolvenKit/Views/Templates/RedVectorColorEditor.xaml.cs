@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 

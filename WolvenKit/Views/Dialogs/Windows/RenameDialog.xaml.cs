@@ -1,10 +1,7 @@
 using System;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Interfaces.Extensions;
@@ -13,7 +10,7 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class RenameDialog : IViewFor<RenameDialogViewModel>
+    public partial class RenameDialog
     {
         /// <summary>
         /// Refactor checkbox visibility (don't show it for files in raw)
@@ -35,7 +32,7 @@ namespace WolvenKit.Views.Dialogs.Windows
                 return;
             }
 
-            var settingsManager = Locator.Current.GetService<ISettingsManager>();
+            var settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
             _refactorDefaultState = settingsManager?.RefactoringCheckboxDefaultValue ?? false;
             s_lastShowRefactorCheckbox = _refactorDefaultState;
         }
@@ -45,23 +42,18 @@ namespace WolvenKit.Views.Dialogs.Windows
             InitializeComponent();
             SetDefaultValue();
 
-            ViewModel = Locator.Current.GetService<RenameDialogViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<RenameDialogViewModel>();
             DataContext = ViewModel;
             ShowRefactorCheckbox = showRefactorCheckbox;
 
             Owner = Application.Current.MainWindow;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.Text,
                         x => x.TextBox.Text)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.EnableRefactoring,
                         x => x.EnableRefactoringCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
                 if (ViewModel is null)
                 {
@@ -96,7 +88,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public RenameDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (RenameDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

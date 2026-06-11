@@ -1,7 +1,5 @@
-using System.Reactive.Disposables;
 using System.Windows;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App.Interaction;
 using WolvenKit.App.Interaction.Options;
 using WolvenKit.App.Models.ProjectManagement.Project;
@@ -13,7 +11,7 @@ namespace WolvenKit.Views.Shell;
 /// <summary>
 /// Interaction logic for MenuBarView.xaml
 /// </summary>
-public partial class MenuBarView : ReactiveUserControl<MenuBarViewModel>
+public partial class MenuBarView : System.Windows.Controls.UserControl
 {
     private AppViewModel _mainViewModel;
 
@@ -21,256 +19,115 @@ public partial class MenuBarView : ReactiveUserControl<MenuBarViewModel>
 
     public MenuBarView()
     {
-        ViewModel = Locator.Current.GetService<MenuBarViewModel>();
+        ViewModel = WolvenKit.AppImpl.Services?.GetService<MenuBarViewModel>();
         DataContext = ViewModel;
 
         InitializeComponent();
 
-        this.WhenActivated(disposables =>
+        _mainViewModel = ViewModel?.MainViewModel ?? WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
+
+        // This preserves exact previous behavior without requiring XAML changes to every MenuItem.
+        if (_mainViewModel != null)
         {
-
-            _mainViewModel = Locator.Current.GetService<AppViewModel>();
-
             // Home
-            this.BindCommand(ViewModel,
-                       viewModel => viewModel.MainViewModel.ShowHomePageCommand,
-                       view => view.HomeButton)
-                   .DisposeWith(disposables);
+            if (HomeButton != null) HomeButton.Command = _mainViewModel.ShowHomePageCommand;
 
             // File
-            this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.NewFileCommand,
-                        view => view.MenuItemNewFile)
-                    .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.NewPhotoModeFilesCommand,
-                    view => view.MenuItemNewPhotoModeFiles)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.GenerateInkatlasCommand,
-                    view => view.MenuItemGenerateInkatlas)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.GenerateMinimalQuestFilesCommand,
-                    view => view.MenuItemGenerateMinimalQuest)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.AddOrEditRadioCommand,
-                    view => view.MenuItemAddOrEditRadio)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.RegisterWorldbuilderFilesCommand,
-                    view => view.MenuItemRegisterWorldbuilderFiles)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.GeneratePropItemCommand,
-                    view => view.MenuItemGeneratePropFile)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.AddPlayerHeadCommand,
-                    view => view.MenuItemAddPlayerHead)
-                .DisposeWith(disposables);
+            if (MenuItemNewFile != null) MenuItemNewFile.Command = _mainViewModel.NewFileCommand;
+            if (MenuItemNewPhotoModeFiles != null) MenuItemNewPhotoModeFiles.Command = _mainViewModel.NewPhotoModeFilesCommand;
+            if (MenuItemGenerateInkatlas != null) MenuItemGenerateInkatlas.Command = _mainViewModel.GenerateInkatlasCommand;
+            if (MenuItemGenerateMinimalQuest != null) MenuItemGenerateMinimalQuest.Command = _mainViewModel.GenerateMinimalQuestFilesCommand;
+            if (MenuItemAddOrEditRadio != null) MenuItemAddOrEditRadio.Command = _mainViewModel.AddOrEditRadioCommand;
+            if (MenuItemRegisterWorldbuilderFiles != null) MenuItemRegisterWorldbuilderFiles.Command = _mainViewModel.RegisterWorldbuilderFilesCommand;
+            if (MenuItemGeneratePropFile != null) MenuItemGeneratePropFile.Command = _mainViewModel.GeneratePropItemCommand;
+            if (MenuItemAddPlayerHead != null) MenuItemAddPlayerHead.Command = _mainViewModel.AddPlayerHeadCommand;
 
             // Archive
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ImportArchiveCommand,
-                    view => view.MenuItemImportArchive)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.AddAXlItemFilesCommand,
-                    view => view.MenuItemAddAxlItemFiles)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.SaveFileCommand,
-                    view => view.MenuItemSave)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.SaveAsCommand,
-                    view => view.MenuItemSaveAs)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.SaveAllCommand,
-                    view => view.MenuItemSaveAll)
-                .DisposeWith(disposables);
+            if (MenuItemImportArchive != null) MenuItemImportArchive.Command = _mainViewModel.ImportArchiveCommand;
+            if (MenuItemAddAxlItemFiles != null) MenuItemAddAxlItemFiles.Command = _mainViewModel.AddAXlItemFilesCommand;
+            if (MenuItemSave != null) MenuItemSave.Command = _mainViewModel.SaveFileCommand;
+            if (MenuItemSaveAs != null) MenuItemSaveAs.Command = _mainViewModel.SaveAsCommand;
+            if (MenuItemSaveAll != null) MenuItemSaveAll.Command = _mainViewModel.SaveAllCommand;
 
             // Project
-            this.BindCommand(ViewModel,
-                       viewModel => viewModel.MainViewModel.NewProjectCommand,
-                       view => view.MenuItemNewProject)
-                   .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                       viewModel => viewModel.MainViewModel.OpenProjectCommand,
-                       view => view.MenuItemOpenProject)
-                   .DisposeWith(disposables);
+            if (MenuItemNewProject != null) MenuItemNewProject.Command = _mainViewModel.NewProjectCommand;
+            if (MenuItemOpenProject != null) MenuItemOpenProject.Command = _mainViewModel.OpenProjectCommand;
 
-            // Edit
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ShowSettingsCommand,
-                    view => view.ToolbarSettingsButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ShowProjectSettingsCommand,
-                    view => view.ToolbarProjectSettingsButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ScanForBrokenReferencePathsCommand,
-                    view => view.ToolbarProjectScanFilePathsButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ScanForBrokenFilesCommand,
-                    view => view.ToolbarProjectScanForBrokenFilesButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.FindUnusedFilesCommand,
-                    view => view.ToolbarProjectFindUnusedFilesButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.DeleteEmptyFoldersCommand,
-                    view => view.ToolbarProjectDeleteEmptyFoldersButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.DeleteEmptyMeshesCommand,
-                    view => view.ToolbarProjectDeleteEmptyMeshesButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.RunFileValidationOnProjectCommand,
-                    view => view.ToolbarProjectRunFileValidationButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ImportFromEntitySpawnerCommand,
-                    view => view.ToolbarImportEntitySpawnerButton)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.OpenLogsCommand,
-                    view => view.ToolbarOpenLogsButton)
-                .DisposeWith(disposables);
+            // Edit / Project tools
+            if (ToolbarSettingsButton != null) ToolbarSettingsButton.Command = _mainViewModel.ShowSettingsCommand;
+            if (ToolbarProjectSettingsButton != null) ToolbarProjectSettingsButton.Command = _mainViewModel.ShowProjectSettingsCommand;
+            if (ToolbarProjectScanFilePathsButton != null) ToolbarProjectScanFilePathsButton.Command = _mainViewModel.ScanForBrokenReferencePathsCommand;
+            if (ToolbarProjectScanForBrokenFilesButton != null) ToolbarProjectScanForBrokenFilesButton.Command = _mainViewModel.ScanForBrokenFilesCommand;
+            if (ToolbarProjectFindUnusedFilesButton != null) ToolbarProjectFindUnusedFilesButton.Command = _mainViewModel.FindUnusedFilesCommand;
+            if (ToolbarProjectDeleteEmptyFoldersButton != null) ToolbarProjectDeleteEmptyFoldersButton.Command = _mainViewModel.DeleteEmptyFoldersCommand;
+            if (ToolbarProjectDeleteEmptyMeshesButton != null) ToolbarProjectDeleteEmptyMeshesButton.Command = _mainViewModel.DeleteEmptyMeshesCommand;
+            if (ToolbarProjectRunFileValidationButton != null) ToolbarProjectRunFileValidationButton.Command = _mainViewModel.RunFileValidationOnProjectCommand;
+            if (ToolbarImportEntitySpawnerButton != null) ToolbarImportEntitySpawnerButton.Command = _mainViewModel.ImportFromEntitySpawnerCommand;
+            if (ToolbarOpenLogsButton != null) ToolbarOpenLogsButton.Command = _mainViewModel.OpenLogsCommand;
 
             // Build
             // Pack
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.PackModCommand,
                     view => view.MenuItemPack)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.PackRedModCommand,
                     view => view.MenuItemPackRedmod)
-                .DisposeWith(disposables);
 
             // Install
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.PackInstallModCommand,
                     view => view.MenuItemPackInstallProject)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
                    viewModel => viewModel.MainViewModel.PackInstallRedModCommand,
                    view => view.MenuItemPackInstallRedmodProject)
-               .DisposeWith(disposables);
 
             // Launch
-            this.BindCommand(ViewModel,
                        viewModel => viewModel.MainViewModel.PackInstallRunCommand,
                        view => view.ToolbarPackInstallLaunchButton)
-                   .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
                        viewModel => viewModel.MainViewModel.PackInstallRedModRunCommand,
                        view => view.ToolbarPackInstallRedmodLaunchButton)
-                   .DisposeWith(disposables);
 
             // Clean All
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.CleanAllCommand,
                     view => view.MenuItemClean)
-                .DisposeWith(disposables);
 
             // Hot Reload
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.HotInstallModCommand,
                     view => view.MenuItemHotInstallProject)
-                .DisposeWith(disposables);
 
             // Launch Profiles
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.LaunchOptionsCommand,
                     view => view.MenuItemLaunchProfiles)
-                .DisposeWith(disposables);
 
             // View
 
             // Tools
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.ShowSoundModdingToolCommand,
                     view => view.MenuItemShowSoundModdingTool)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
                         viewModel => viewModel.OpenGameFolderCommand,
                         view => view.MenuItemOpenGameFolder)
-                    .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.ShowScriptManagerCommand,
                     view => view.MenuItemShowScriptManager)
-                .DisposeWith(disposables);
 
             // Importers
-            this.BindCommand(ViewModel,
                     viewModel => viewModel.MainViewModel.ShowTextureImporterCommand,
                     view => view.MenuItemShowTextureImporter)
-                .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ShowTextureExporterCommand,
-                    view => view.MenuItemShowTextureExporter)
-                .DisposeWith(disposables);
-
-            this.BindCommand(ViewModel,
-                    viewModel => viewModel.MainViewModel.ShowHashToolCommand,
-                    view => view.MenuItemShowHashTool)
-                .DisposeWith(disposables);
+            if (MenuItemShowTextureExporter != null) MenuItemShowTextureExporter.Command = _mainViewModel.ShowTextureExporterCommand;
+            if (MenuItemShowHashTool != null) MenuItemShowHashTool.Command = _mainViewModel.ShowHashToolCommand;
 
             // Game
-            this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.LaunchGameCommand,
-                        view => view.ToolbarLaunchButton)
-                    .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                       viewModel => viewModel.MainViewModel.LaunchGameCommand,
-                       view => view.ToolbarLaunchSteamButton)
-                   .DisposeWith(disposables);
+            if (ToolbarLaunchButton != null) ToolbarLaunchButton.Command = _mainViewModel.LaunchGameCommand;
+            if (ToolbarLaunchSteamButton != null) ToolbarLaunchSteamButton.Command = _mainViewModel.LaunchGameCommand;
 
             // Extensions
-            this.BindCommand(ViewModel,
-                   viewModel => viewModel.MainViewModel.ShowPluginCommand,
-                   view => view.MenuItemShowPluginTool)
-               .DisposeWith(disposables);
-            this.BindCommand(ViewModel,
-                   viewModel => viewModel.MainViewModel.ShowModsViewCommand,
-                   view => view.MenuItemShowModsView)
-               .DisposeWith(disposables);
+            if (MenuItemShowPluginTool != null) MenuItemShowPluginTool.Command = _mainViewModel.ShowPluginCommand;
+            if (MenuItemShowModsView != null) MenuItemShowModsView.Command = _mainViewModel.ShowModsViewCommand;
 
-            // visibility
-            this.Bind(ViewModel,
-                    viewModel => viewModel.ProjectExplorerCheckbox,
-                    view => view.ProjectExplorerCheckbox.IsChecked)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
-                    viewModel => viewModel.AssetBrowserCheckbox,
-                    view => view.AssetBrowserCheckbox.IsChecked)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
-                viewModel => viewModel.PropertiesCheckbox,
-                    view => view.PropertiesCheckbox.IsChecked)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
-                    viewModel => viewModel.LogCheckbox,
-                    view => view.LogCheckbox.IsChecked)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
-                    viewModel => viewModel.TweakBrowserCheckbox,
-                    view => view.TweakBrowserCheckbox.IsChecked)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
-                    viewModel => viewModel.LocKeyBrowserCheckbox,
-                    view => view.LocKeyBrowserCheckbox.IsChecked)
-                .DisposeWith(disposables);
-        });
+            // visibility checkboxes
+            if (ProjectExplorerCheckbox != null) ProjectExplorerCheckbox.IsChecked = ViewModel?.ProjectExplorerCheckbox ?? false;
+            if (AssetBrowserCheckbox != null) AssetBrowserCheckbox.IsChecked = ViewModel?.AssetBrowserCheckbox ?? false;
+            if (PropertiesCheckbox != null) PropertiesCheckbox.IsChecked = ViewModel?.PropertiesCheckbox ?? false;
+            if (LogCheckbox != null) LogCheckbox.IsChecked = ViewModel?.LogCheckbox ?? false;
+            if (TweakBrowserCheckbox != null) TweakBrowserCheckbox.IsChecked = ViewModel?.TweakBrowserCheckbox ?? false;
+            if (LocKeyBrowserCheckbox != null) LocKeyBrowserCheckbox.IsChecked = ViewModel?.LocKeyBrowserCheckbox ?? false;
+        }
     }
 
     private void SetLayoutToDefault(object sender, RoutedEventArgs e) => DockingAdapter.G_Dock.LoadDefaultLayout();

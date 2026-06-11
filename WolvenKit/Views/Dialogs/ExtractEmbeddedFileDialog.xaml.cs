@@ -1,13 +1,12 @@
 using System.IO;
 using System.Windows;
-using ReactiveUI;
 using WolvenKit.App.Interaction;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Interfaces.Extensions;
 
 namespace WolvenKit.Views.Dialogs;
 
-public partial class ExtractEmbeddedFileDialog : ReactiveUserControl<ExtractEmbeddedFileDialogViewModel>
+public partial class ExtractEmbeddedFileDialog : System.Windows.Controls.UserControl
 {
     public ExtractEmbeddedFileDialog()
     {

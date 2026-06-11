@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
-using Splat;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.Services;
@@ -25,7 +22,7 @@ using WolvenKit.Views.Exporters;
 
 namespace WolvenKit.Views.Importers;
 
-public partial class ImportView : ReactiveUserControl<ImportViewModel>
+public partial class ImportView : System.Windows.Controls.UserControl
 {
     private readonly Dictionary<string, PropertyInfo> _shownProperties = new();
 
@@ -36,29 +33,21 @@ public partial class ImportView : ReactiveUserControl<ImportViewModel>
         ImportGrid.FilterRowCellRenderers.Add("TextBoxExt", new GridFilterRowTextBoxRendererExt());
         ImportGrid.FilterChanged += Datagrid_FilterChanged;
 
-        this.WhenActivated(disposables =>
         {
             if (DataContext is ImportViewModel viewModel)
             {
-                SetCurrentValue(ViewModelProperty, viewModel);
             }
 
             ViewModel.OnRefresh += RefreshFilter;
 
-            this.OneWayBind(ViewModel,
                     x => x.SelectedObject.Properties,
                     x => x.OverlayPropertyGrid.SelectedObject)
-                .DisposeWith(disposables);
 
-            this.Bind(ViewModel,
                     x => x.Items,
                     x => x.ImportGrid.ItemsSource)
-                .DisposeWith(disposables);
 
-            this.Bind(ViewModel,
                    x => x.SelectedObject,
                    x => x.ImportGrid.SelectedItem)
-               .DisposeWith(disposables);
         });
     }
 
@@ -80,7 +69,7 @@ public partial class ImportView : ReactiveUserControl<ImportViewModel>
     // TODO refactor this and move to ViewModel
     private void ShowSettings()
     {
-        var mod = Locator.Current.GetService<IProjectManager>().NotNull().ActiveProject;
+        var mod = WolvenKit.AppImpl.Services?.GetService<IProjectManager>().NotNull().ActiveProject;
         if (mod is null)
         {
             return;
@@ -123,7 +112,7 @@ public partial class ImportView : ReactiveUserControl<ImportViewModel>
     // TODO refactor this and move to ViewModel
     private void AnimsetComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
-        var mod = Locator.Current.GetService<IProjectManager>().NotNull().ActiveProject;
+        var mod = WolvenKit.AppImpl.Services?.GetService<IProjectManager>().NotNull().ActiveProject;
         if (mod is null ||
             ImportGrid.SelectedItem is not ImportableItemViewModel { Properties: ReImportArgs args } ||
             AnimsetComboBox.SelectedItem is not string selectedItem)
@@ -141,7 +130,7 @@ public partial class ImportView : ReactiveUserControl<ImportViewModel>
         }
 
         using var fs = new FileStream(path, FileMode.Open);
-        var parser = Locator.Current.GetService<Red4ParserService>();
+        var parser = WolvenKit.AppImpl.Services?.GetService<Red4ParserService>();
         if (!parser.TryReadRed4File(fs, out var originalFile) || originalFile.RootChunk is not animAnimSet animset)
         {
             return;

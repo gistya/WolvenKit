@@ -12,12 +12,9 @@ namespace WolvenKit.Views.Editors
     /// <example>
     /// Two-way binding doesn't work, needs to bind like this:
     /// <code>
-    /// this.WhenActivated(disposables =>
     /// {
-    ///    this.Bind(ViewModel,
     ///            x => x.ComponentName,
     ///            x => x.FilterableDropdownMenu.SelectedOption)
-    ///        .DisposeWith(disposables);
     ///});
     /// </code>
     /// </example>

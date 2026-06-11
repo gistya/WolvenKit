@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Core;
@@ -9,7 +8,7 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class ShowNewPlayerHeadDialog : IViewFor<PlayerHeadDialogViewModel>
+    public partial class ShowNewPlayerHeadDialog
     {
         public ShowNewPlayerHeadDialog()
         {
@@ -19,7 +18,6 @@ namespace WolvenKit.Views.Dialogs.Windows
             DataContext = ViewModel;
             Owner = Application.Current.MainWindow;
 
-            this.WhenActivated(disposables =>
             {
                 RadioButtonFemale.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
                     ViewModel.BodyGender == PhotomodeBodyGender.Female);
@@ -29,7 +27,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public PlayerHeadDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (PlayerHeadDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

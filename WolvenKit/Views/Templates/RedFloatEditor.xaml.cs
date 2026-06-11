@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 
@@ -24,7 +23,6 @@ namespace WolvenKit.Views.Editors
                 handler => TextBox.TextChanged += handler,
                 handler => TextBox.TextChanged -= handler)
                 .Throttle(TimeSpan.FromSeconds(.5))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(x =>
                 {
                     SetRedValue(TextBox.Text);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using Splat;
 using WolvenKit.App.Scripting;
 using WolvenKit.App.Services;
 using WolvenKit.Views.Templates;
@@ -33,7 +32,7 @@ public class ScriptableMenuItem : MenuItem, IScriptableControl
             throw new Exception("ScriptingName must be explicitly set!");
         }
 
-        _scriptService = Locator.Current.GetService<AppScriptService>();
+        _scriptService = WolvenKit.AppImpl.Services?.GetService<AppScriptService>();
         if (_scriptService == null)
         {
             throw new Exception("AppScriptService could not be found!");

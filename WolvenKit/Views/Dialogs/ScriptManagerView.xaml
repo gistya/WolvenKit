@@ -1,6 +1,6 @@
-﻿<reactiveUi:ReactiveUserControl
+﻿<UserControl
     x:Class="WolvenKit.Views.Dialogs.ScriptManagerView"
-    x:TypeArguments="dialogs:ScriptManagerViewModel"
+   
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,7 +8,7 @@
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:reactiveUi="http://reactiveui.net"
+   
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     xmlns:templates="clr-namespace:WolvenKit.Views.Templates"
     mc:Ignorable="d"
@@ -270,4 +270,4 @@
             </Button>
         </DockPanel>
     </Grid>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

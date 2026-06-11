@@ -1,7 +1,6 @@
 using System;
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.Windows.Tools.Controls;
 using WolvenKit.App.Interaction;
 using WolvenKit.App.Services;
@@ -10,7 +9,7 @@ using WolvenKit.App.ViewModels.Tools.EditorDifficultyLevel;
 
 namespace WolvenKit.Views.Documents
 {
-    public partial class RedDocumentView : ReactiveUserControl<RedDocumentViewModel>
+    public partial class RedDocumentView : System.Windows.Controls.UserControl
     {
         public RedDocumentView()
         {
@@ -18,16 +17,11 @@ namespace WolvenKit.Views.Documents
 
             TabControl.SelectedItemChangedEvent += TabControl_OnSelectedItemChangedEvent;
 
-            this.WhenActivated(disposables =>
+            if (DataContext is RedDocumentViewModel vm)
             {
-                if (DataContext is not RedDocumentViewModel vm)
-                {
-                    return;
-                }
-
-                SetCurrentValue(ViewModelProperty, vm);
-                RedDocumentViewToolbar.CurrentTab = vm.SelectedTabItemViewModel;
-            });
+                // ViewModel property for compatibility with some callers
+                // (DataContext is set by DataTemplate or parent)
+            }
         }
 
         private void TabControl_OnSelectedItemChangedEvent(object sender, SelectedItemChangedEventArgs e)
@@ -55,7 +49,7 @@ namespace WolvenKit.Views.Documents
             {
                 return;
             }
-            var settingsManager = Locator.Current.GetService<ISettingsManager>();
+            var settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
             var newEditorLevel = settingsManager.DefaultEditorDifficultyLevel switch
             {
                 EditorDifficultyLevel.None => EditorDifficultyLevel.Easy,

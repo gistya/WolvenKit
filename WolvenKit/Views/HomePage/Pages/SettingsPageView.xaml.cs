@@ -1,7 +1,4 @@
-using System.Reactive.Disposables;
 using System.Windows.Controls;
-using ReactiveUI;
-using Splat;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.Services;
 using WolvenKit.Controls;
@@ -10,31 +7,24 @@ using static WolvenKit.Converters.PropertyGridEditors;
 
 namespace WolvenKit.Views.HomePage.Pages
 {
-    public partial class SettingsPageView : ReactiveUserControl<SettingsPageViewModel>
+    public partial class SettingsPageView : System.Windows.Controls.UserControl
     {
         public SettingsPageView()
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<SettingsPageViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<SettingsPageViewModel>();
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                     viewModel => viewModel.Settings,
                     view => view.SettingsPropertygrid.SelectedObject)
-                .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.MainViewModel.CheckForUpdatesCommand,
                       view => view.CheckForUpdatesButton)
-                .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.MainViewModel.CloseModalCommand,
                       view => view.SaveCloseButton)
-                .DisposeWith(disposables);
             });
         }
 

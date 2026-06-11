@@ -1,11 +1,10 @@
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs;
 
-public partial class UpdateDialog : ReactiveUserControl<UpdateDialogViewModel>
+public partial class UpdateDialog : System.Windows.Controls.UserControl
 {
     public UpdateDialog()
     {

@@ -1,5 +1,4 @@
 ﻿using System.Windows.Input;
-using ReactiveUI;
 using System.Windows;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.App.Models.ProjectManagement.Project;
@@ -8,7 +7,7 @@ namespace WolvenKit.Views.Dialogs.Windows;
 /// <summary>
 /// Interaction logic for ConvertToCCXLMaterials.xaml
 /// </summary>
-public partial class ConvertHairToCCXLMaterialsDialog : IViewFor<ConvertHairToCCXLMaterialsDialogViewModel>
+public partial class ConvertHairToCCXLMaterialsDialog
 {
     public ConvertHairToCCXLMaterialsDialog(Cp77Project activeProject)
     {
@@ -18,7 +17,6 @@ public partial class ConvertHairToCCXLMaterialsDialog : IViewFor<ConvertHairToCC
     }
 
     public ConvertHairToCCXLMaterialsDialogViewModel ViewModel { get; set; }
-    object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (ConvertHairToCCXLMaterialsDialogViewModel)value; }
 
     private void WizardPage_PreviewKeyDown(object sender, KeyEventArgs e)
     {

@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,8 +7,6 @@ using System.Windows.Input;
 using DynamicData;
 using HandyControl.Data;
 using MahApps.Metro.Controls;
-using ReactiveUI;
-using Splat;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using Syncfusion.UI.Xaml.TreeGrid;
@@ -20,7 +17,7 @@ using WolvenKit.Core.Services;
 
 namespace WolvenKit.Views.Tools
 {
-    public partial class AssetBrowserView : ReactiveUserControl<AssetBrowserViewModel>
+    public partial class AssetBrowserView : System.Windows.Controls.UserControl
     {
         private string _currentFolderQuery = "";
 
@@ -36,83 +33,50 @@ namespace WolvenKit.Views.Tools
             InitializeComponent();
 
             // modifier key state awareness
-            _modifierViewSvc = Locator.Current.GetService<IModifierViewStateService>();
+            _modifierViewSvc = WolvenKit.AppImpl.Services?.GetService<IModifierViewStateService>();
             _modifierViewSvc.ModifierStateChanged += OnModifierStateChanged;
 
 
-            this.WhenActivated(disposables =>
             {
                 if (DataContext is AssetBrowserViewModel vm)
                 {
-                    SetCurrentValue(ViewModelProperty, vm);
                 }
 
-                this.Bind(ViewModel,
                       viewModel => viewModel.SearchBarText,
                       view => view.FileSearchBar.Text)
-                  .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         viewModel => viewModel.IsModBrowserEnabled,
                         view => view.IsModBrowserEnabled)
-                    .DisposeWith(disposables);
 
                 // left navigation
-                this.OneWayBind(ViewModel,
                         viewModel => viewModel.LeftItems,
                         view => view.LeftNavigation.ItemsSource)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         viewModel => viewModel.LeftSelectedItem,
                         view => view.LeftNavigation.SelectedItem)
-                    .DisposeWith(disposables);
 
                 // right file list
-                this.OneWayBind(ViewModel,
                         viewModel => viewModel.RightItems,
                         view => view.RightFileView.ItemsSource)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         viewModel => viewModel.RightSelectedItem,
                         view => view.RightFileView.SelectedItem)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         viewModel => viewModel.RightSelectedItems,
                         view => view.RightFileView.SelectedItems)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                         viewModel => viewModel.FindUsesCommand,
                         view => view.RightContextMenuFindUsesMenuItem)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.FindUsingCommand,
                       view => view.RightContextMenuFindUsingMenuItem)
-                  .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.BrowseToFolderCommand,
                       view => view.RightContextMenuBrowseToFolder)
-                  .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.CopyRelPathCommand,
                       view => view.RightContextMenuCopyPathMenuItem)
-                  .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                         viewModel => viewModel.CopyRelPathFileNameCommand,
                         view => view.RightContextMenuCopyNameMenuItem)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                         viewModel => viewModel.CopyRelPathFileNameNoExtensionCommand,
                         view => view.RightContextMenuCopyFileNameNoExtensionMenuItem)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.OpenFileOnlyCommand,
                       view => view.OpenFileOnly)
-                  .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                       viewModel => viewModel.AddSelectedCommand,
                       view => view.AddSelected)
-                  .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
                     viewModel => viewModel.AddFromArchiveCommand,
                     view => view.AddFromArchive);
 
@@ -293,7 +257,7 @@ namespace WolvenKit.Views.Tools
                     return;
                 }
 
-                Locator.Current.GetService<PropertiesViewModel>()?.ExecuteSelectFile(fileSystemViewModel);
+                WolvenKit.AppImpl.Services?.GetService<PropertiesViewModel>()?.ExecuteSelectFile(fileSystemViewModel);
             }
 
             vm.UpdateSearchInArchives();

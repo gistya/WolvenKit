@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using ReactiveUI;
 using Syncfusion.Windows.Controls.Input;
 using WolvenKit.App.Models.ProjectManagement.Project;
 using WolvenKit.App.ViewModels.Dialogs;
@@ -15,7 +13,7 @@ using WolvenKit.Core;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class AddPropFileDialog : IViewFor<AddPropFileDialogViewModel>
+    public partial class AddPropFileDialog
     {
         private static string s_lastParentFolder = string.Empty;
         private static string s_lastMeshFile1 = string.Empty;
@@ -39,112 +37,65 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.PropName,
                         x => x.PropNameTextBox.Text)
-                    .DisposeWith(disposables);
 
                 // parent folder
-                this.Bind(ViewModel,
                         x => x.ParentFolder,
                         x => x.ParentFolderDropdownMenu.dropdown.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.ParentFolder,
                         x => x.ParentFolderBox.Text)
-                    .DisposeWith(disposables);
 
 
-                this.Bind(ViewModel,
                         x => x.ProjectFolders,
                         x => x.ParentFolderDropdownMenu.Options)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.ProjectMeshes,
                         x => x.Mesh1DropdownMenu.Options)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.ProjectMeshes,
                         x => x.Mesh2DropdownMenu.Options)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.ProjectMeshes,
                         x => x.Mesh3DropdownMenu.Options)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.ProjectMeshes,
                         x => x.Mesh4DropdownMenu.Options)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.MeshFile1,
                         x => x.Mesh1DropdownMenu.dropdown.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile1UseAppearances,
                         x => x.MeshFile1UseAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile1ReadFromMesh,
                         x => x.MeshFile1ReadAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.MeshFile2,
                         x => x.Mesh2DropdownMenu.dropdown.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile2UseAppearances,
                         x => x.MeshFile2UseAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile2ReadFromMesh,
                         x => x.MeshFile2ReadAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.MeshFile3,
                         x => x.Mesh3DropdownMenu.dropdown.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile3UseAppearances,
                         x => x.MeshFile3UseAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile3ReadFromMesh,
                         x => x.MeshFile3ReadAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.MeshFile4,
                         x => x.Mesh4DropdownMenu.dropdown.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile4UseAppearances,
                         x => x.MeshFile4UseAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshFile4ReadFromMesh,
                         x => x.MeshFile4ReadAppearancesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
 
-                this.Bind(ViewModel,
                         x => x.MoveMeshesToFolder,
                         x => x.MoveMeshesToFolderCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.CleanupInvalidEntries,
                         x => x.CleanupInvalidEntriesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.RememberSelection,
                         x => x.RememberValuesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
                 Mesh1DropdownMenu.dropdown.SelectionChanged += Mesh1SelectionChanged;
                 disposables.Add(Disposable.Create(() =>
@@ -301,7 +252,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public AddPropFileDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (AddPropFileDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

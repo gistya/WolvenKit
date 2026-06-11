@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.Models.ProjectManagement.Project;
 using WolvenKit.App.ViewModels.Dialogs;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -12,7 +10,7 @@ using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace WolvenKit.Views.Dialogs.Windows;
 
-public partial class AddInkatlasDialog : IViewFor<AddInkatlasDialogViewModel>
+public partial class AddInkatlasDialog
 {
     private static string s_lastSourceFolder = "";
     private static string s_lastRelativePath = "";
@@ -29,61 +27,37 @@ public partial class AddInkatlasDialog : IViewFor<AddInkatlasDialogViewModel>
 
         LoadLastSelection();
 
-        this.WhenActivated(disposables =>
         {
             // bind to filteredDropdownMenu
-            this.Bind(ViewModel,
                     x => x.ExistingFiles,
                     x => x.ExistingFileDropdownMenu.Options)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.ExistingFile,
                     x => x.ExistingFileDropdownMenu.SelectedOption)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.ProjectFolders,
                     x => x.FilterableDropdownMenu.Options)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.RelativePath,
                     x => x.FilterableDropdownMenu.SelectedOption)
-                .DisposeWith(disposables);
 
             // bind rest of properties
-            this.Bind(ViewModel,
                     x => x.RelativePath,
                     x => x.RelativePathBox.Text)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.InkatlasFileName,
                     x => x.InkatlasFileNameBox.Text)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.PngSourceDir,
                     x => x.PngFolderBox.Text)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.ExistingFile,
                     x => x.ExistingFileBox.Text)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.TileWidth,
                     x => x.TileWidthBox.Text)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.TileHeight,
                     x => x.TileHeightBox.Text)
-                .DisposeWith(disposables);
-            this.Bind(ViewModel,
                     x => x.RememberValues,
                     x => x.RememberValuesCheckBox.IsChecked)
-                .DisposeWith(disposables);
         });
     }
 
     public AddInkatlasDialogViewModel ViewModel { get; set; }
 
-    object IViewFor.ViewModel
     {
         get => ViewModel;
         set => ViewModel = (AddInkatlasDialogViewModel)value;

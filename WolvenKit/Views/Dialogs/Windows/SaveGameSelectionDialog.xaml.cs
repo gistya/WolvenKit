@@ -1,6 +1,4 @@
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
 using Syncfusion.UI.Xaml.Grid;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Helpers;
@@ -13,18 +11,17 @@ namespace WolvenKit.Views.Dialogs.Windows
     /// <summary>
     /// Interaction logic for SaveGameSelectionDialog.xaml
     /// </summary>
-    public partial class SaveGameSelectionDialog : IViewFor<SaveGameSelectionDialogModel>
+    public partial class SaveGameSelectionDialog
     {
         public SaveGameSelectionDialog()
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<SaveGameSelectionDialogModel>()!;
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<SaveGameSelectionDialogModel>()!;
             DataContext = ViewModel;
             SaveDataGrid.FilterRowCellRenderers.Add("TextBoxExt", new GridFilterRowTextBoxRendererExt());
             SaveDataGrid.QueryRowHeight += DataGrid_QueryRowHeight;
 
-            this.WhenActivated(disposables =>
             {
                 SaveDataGrid.ClearFilters();
             });
@@ -47,7 +44,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public SaveGameSelectionDialogModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (SaveGameSelectionDialogModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using Splat;
 using WolvenKit.App.Services;
 using WolvenKit.RED4.Types;
 
@@ -20,7 +19,7 @@ namespace WolvenKit.Views.Editors
         {
             InitializeComponent();
 
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
         }
 
         public TweakDBID RedString

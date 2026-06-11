@@ -1,19 +1,17 @@
 using System;
 using System.Linq;
 using NAudioWpfDemo.AudioPlaybackDemo;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.ViewModels.Tools;
 
 namespace WolvenKit.Views.Tools;
 /// <summary>
 /// Interaktionslogik für AudioPlayerView.xaml
 /// </summary>
-public partial class AudioPlayerView : ReactiveUserControl<AudioPlayerViewModel>
+public partial class AudioPlayerView : System.Windows.Controls.UserControl
 {
     public AudioPlayerView()
     {
-        ViewModel = Locator.Current.GetService<AudioPlayerViewModel>();
+        ViewModel = WolvenKit.AppImpl.Services?.GetService<AudioPlayerViewModel>();
 
         // TODO do this properly
         ViewModel.Visualizations.Add(new SpectrumAnalyzerVisualization());

@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.Templates;
@@ -19,7 +18,6 @@ namespace WolvenKit.Views.Editors
 
             InitializeComponent();
 
-            this.WhenActivated(disposables =>
             {
                 if (DataContext is not ChunkViewModel vm)
                 {

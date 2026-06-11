@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.ViewModels.GraphEditor;
 using WolvenKit.App.ViewModels.GraphEditor.Nodes.Quest;
 using WolvenKit.App.ViewModels.GraphEditor.Nodes.Scene;
@@ -22,7 +20,6 @@ public partial class RDTGraphView2
 
         KeyDown += OnKeyDown;
 
-        this.WhenActivated(disposables =>
         {
             BuildBreadcrumb();
         });
@@ -45,7 +42,7 @@ public partial class RDTGraphView2
             var subGraph = provider.Graph;
             if (subGraph == null)
             {
-                Locator.Current.GetService<ILoggerService>().Error("SubGraph is not defined!");
+                WolvenKit.AppImpl.Services?.GetService<ILoggerService>().Error("SubGraph is not defined!");
                 return;
             }
 

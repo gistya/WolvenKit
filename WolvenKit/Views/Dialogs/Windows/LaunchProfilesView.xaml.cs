@@ -5,14 +5,11 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using HandyControl.Controls;
-using ReactiveUI;
-using Splat;
 using Syncfusion.UI.Xaml.Grid;
 using WolvenKit.App.Interaction;
 using WolvenKit.App.Models;
@@ -22,27 +19,16 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class LaunchProfilesView : IViewFor<LaunchProfilesViewModel>
+    public partial class LaunchProfilesView
     {
         public LaunchProfilesView()
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<LaunchProfilesViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<LaunchProfilesViewModel>();
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
             {
-                this.BindCommand(ViewModel, x => x.NewItemCommand, x => x.ToolbarNewItem)
-                   .DisposeWith(disposables);
-                this.BindCommand(ViewModel, x => x.DuplicateItemCommand, x => x.ToolbarDuplicateItem)
-                   .DisposeWith(disposables);
-                this.BindCommand(ViewModel, x => x.DeleteItemCommand, x => x.ToolbarDeleteItem)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel, x => x.PositionDownCommand, x => x.ToolbarDownItem)
-                   .DisposeWith(disposables);
-                this.BindCommand(ViewModel, x => x.PositionUpCommand, x => x.ToolbarUpItem)
-                    .DisposeWith(disposables);
 
                 if (ViewModel is not null)
                 {
@@ -70,7 +56,6 @@ namespace WolvenKit.Views.Dialogs.Windows
 
 
         public LaunchProfilesViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (LaunchProfilesViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

@@ -2,8 +2,6 @@ using System;
 using System.Collections.Specialized;
 using System.Windows;
 using HelixToolkit.Wpf.SharpDX;
-using ReactiveUI;
-using Splat;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.ViewModels.Tools;
 
@@ -12,7 +10,7 @@ namespace WolvenKit.Views.Tools
     /// <summary>
     /// Interaction logic for PropertiesView.xaml
     /// </summary>
-    public partial class PropertiesView : ReactiveUserControl<PropertiesViewModel>
+    public partial class PropertiesView : System.Windows.Controls.UserControl
     {
         public string _fileName;
 
@@ -20,7 +18,7 @@ namespace WolvenKit.Views.Tools
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<PropertiesViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<PropertiesViewModel>();
             DataContext = ViewModel;
 
             ViewModel.ModelGroup.CollectionChanged += (object sender, NotifyCollectionChangedEventArgs e) =>

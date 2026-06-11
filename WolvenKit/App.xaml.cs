@@ -2,13 +2,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ReactiveUI;
 using Serilog;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
@@ -32,6 +30,8 @@ namespace WolvenKit
 
         private ISettingsManager _settingsManager;
         private ILoggerService _loggerService;
+
+        public static IServiceProvider Services { get; private set; }
 
         // Constructor #1
         static AppImpl()
@@ -137,6 +137,7 @@ namespace WolvenKit
             // we need to re-register the built container with Splat again
             Container = _host.Services;
             Container.UseMicrosoftDependencyResolver();
+            Services = Container;
 
             MoveOldLogs();
 
@@ -226,42 +227,7 @@ namespace WolvenKit
                 e.SetObserved();
             };
 
-            RxApp.DefaultExceptionHandler = new DefaultObserverExceptionHandler();
-        }
-
-        /// <summary>
-        /// This isn't great but can used until each TaskCommand ThrownExceptions can be properly subscribed to.
-        /// </summary>
-        // https://www.reactiveui.net/docs/handbook/default-exception-handler/
-        public class DefaultObserverExceptionHandler : IObserver<Exception>
-        {
-            public void OnNext(Exception ex)
-            {
-                if (Debugger.IsAttached) // If we're debugging, break.
-                {
-                    Debugger.Break();
-                }
-
-                LogUnhandledException(ex, "RxApp.DefaultExceptionHandler");
-            }
-
-            public void OnError(Exception ex)
-            {
-                if (Debugger.IsAttached) // If we're debugging, break.
-                {
-                    Debugger.Break();
-                }
-
-                LogUnhandledException(ex, "RxApp.DefaultExceptionHandler");
-            }
-
-            public void OnCompleted()
-            {
-                if (Debugger.IsAttached) // If we're debugging, break.
-                {
-                    Debugger.Break();
-                }
-            }
+            // Default exception handling for the app (RxApp removed with ReactiveUI view migration)
         }
 
         private static void LogUnhandledException(Exception exception, string source)

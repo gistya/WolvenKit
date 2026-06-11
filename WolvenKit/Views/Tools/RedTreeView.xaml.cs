@@ -10,7 +10,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
-using Splat;
 using Syncfusion.Data.Extensions;
 using Syncfusion.UI.Xaml.TreeView;
 using Syncfusion.UI.Xaml.TreeView.Helpers;
@@ -44,13 +43,13 @@ namespace WolvenKit.Views.Tools
 
         public RedTreeView()
         {
-            _modifierViewStateSvc = Locator.Current.GetService<IModifierViewStateService>();
-            _loggerService = Locator.Current.GetService<ILoggerService>();
-            _progressService = Locator.Current.GetService<IProgressService<double>>();
-            _appViewModel = Locator.Current.GetService<AppViewModel>();
-            _projectResourceTools = Locator.Current.GetService<ProjectResourceTools>();
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
-            _cvmMaterialTools = Locator.Current.GetService<CvmMaterialTools>();
+            _modifierViewStateSvc = WolvenKit.AppImpl.Services?.GetService<IModifierViewStateService>();
+            _loggerService = WolvenKit.AppImpl.Services?.GetService<ILoggerService>();
+            _progressService = WolvenKit.AppImpl.Services?.GetService<IProgressService<double>>();
+            _appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
+            _projectResourceTools = WolvenKit.AppImpl.Services?.GetService<ProjectResourceTools>();
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
+            _cvmMaterialTools = WolvenKit.AppImpl.Services?.GetService<CvmMaterialTools>();
 
             InitializeComponent();
 

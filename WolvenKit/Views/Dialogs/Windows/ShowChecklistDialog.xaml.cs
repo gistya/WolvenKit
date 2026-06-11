@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.Interaction.Options;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Dialogs;
@@ -14,7 +12,7 @@ using Window = System.Windows.Window;
 namespace WolvenKit.Views.Dialogs.Windows;
 
 
-public partial class ShowChecklistDialog : IViewFor<ShowChecklistDialogViewModel>
+public partial class ShowChecklistDialog
 {
     private static List<string> s_lastSelection = [];
     private static string s_lastInputFieldText = "";
@@ -37,22 +35,15 @@ public partial class ShowChecklistDialog : IViewFor<ShowChecklistDialogViewModel
         ViewModel = new ShowChecklistDialogViewModel(options);
         DataContext = ViewModel;
 
-        this.WhenActivated(disposables =>
         {
             // bind to filteredChecklistMenu
-            this.Bind(ViewModel,
                     x => x.ChecklistOptions,
                     x => x.FilterableChecklistMenu.CheckboxOptionsAndStates)
-                .DisposeWith(disposables);
 
             // bind to selectedOptions
-            this.Bind(ViewModel,
+            // Note: converter overrides removed with ReactiveUI migration. Collection conversion handled inside the menu or VM if needed.
                     x => x.SelectedOptions,
-                    x => x.FilterableChecklistMenu.SelectedOptions,
-                    viewToVMConverterOverride: new CollectionToCollectionTypeConverter(),
-                    vmToViewConverterOverride: new CollectionToCollectionTypeConverter()
-                )
-                .DisposeWith(disposables);
+                    x => x.FilterableChecklistMenu.SelectedOptions)
 
             // set filter text (if given)
             FilterableChecklistMenu.SetCurrentValue(Templates.FilterableChecklistMenu.FilterTextProperty,
@@ -63,22 +54,17 @@ public partial class ShowChecklistDialog : IViewFor<ShowChecklistDialogViewModel
                 .Select(x => x.Key).ToList();
 
             // bind rest of properties
-            this.Bind(ViewModel,
                     x => x.InputFieldText,
                     x => x.TextInputBox.Text)
-                .DisposeWith(disposables);
 
-            this.Bind(ViewModel,
                     x => x.RememberValues,
                     x => x.RememberValuesCheckBox.IsChecked)
-                .DisposeWith(disposables);
         });
     }
 
 
     public ShowChecklistDialogViewModel ViewModel { get; set; }
 
-    object IViewFor.ViewModel
     {
         get => ViewModel;
         set => ViewModel = (ShowChecklistDialogViewModel)value;

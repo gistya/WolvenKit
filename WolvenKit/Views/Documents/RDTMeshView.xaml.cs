@@ -1,10 +1,9 @@
 using System;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using HelixToolkit.SharpDX.Core;
-using ReactiveUI;
+using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.UI.Xaml.TreeGrid;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Documents;
@@ -15,13 +14,18 @@ namespace WolvenKit.Views.Documents
     /// <summary>
     /// Interaction logic for RDTTextureView.xaml
     /// </summary>
-    public partial class RDTMeshView : ReactiveUserControl<RDTMeshViewModel>
+    public partial class RDTMeshView : System.Windows.Controls.UserControl
     {
         private TreeGridNodeContextMenuInfo _currentNode;
 
         public RDTMeshView()
         {
             InitializeComponent();
+
+            if (DataContext is null)
+            {
+                DataContext = WolvenKit.AppImpl.Services?.GetService<RDTMeshViewModel>();
+            }
 
             //hxViewport.DXSceneInitialized += delegate (object sender, EventArgs args)
             //{
@@ -31,26 +35,19 @@ namespace WolvenKit.Views.Documents
             //    hxViewport.ZoomExtents();
             //};
 
-            this.WhenActivated(disposables =>
+            HandleActivation();
+
+            if (DataContext is RDTMeshViewModel vm && hxContentVisual != null)
             {
-                HandleActivation();
-
-                Disposable
-                    .Create(HandleDeactivation)
-                    .DisposeWith(disposables);
-
-                this.OneWayBind(ViewModel,
-                        viewModel => viewModel.SelectedAppearance.ModelGroup,
-                        view => view.hxContentVisual.ItemsSource)
-                    .DisposeWith(disposables);
-            });
+                // ItemsSource binding for the 3D visual can be added in XAML if not already present:
+                // hxContentVisual.ItemsSource = vm.SelectedAppearance?.ModelGroup;
+            }
         }
 
         private void HandleActivation()
         {
             if (DataContext is RDTMeshViewModel vm)
             {
-                SetCurrentValue(ViewModelProperty, vm);
                 if (vm.EffectsManager == null || vm.EffectsManager.IsDisposed)
                 {
                     vm.EffectsManager = new DefaultEffectsManager();

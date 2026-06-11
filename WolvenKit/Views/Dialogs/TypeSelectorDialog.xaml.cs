@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Helpers;
 
@@ -21,7 +19,7 @@ namespace WolvenKit.Views.Dialogs;
 /// <summary>
 /// Interaktionslogik für TypeSelectorDialog.xaml
 /// </summary>
-public partial class TypeSelectorDialog : ReactiveUserControl<TypeSelectorDialogViewModel>
+public partial class TypeSelectorDialog : System.Windows.Controls.UserControl
 {
     public TypeSelectorDialog()
     {
@@ -29,21 +27,12 @@ public partial class TypeSelectorDialog : ReactiveUserControl<TypeSelectorDialog
 
         TypeDataGrid.FilterRowCellRenderers.Add("TextBoxExt", new GridFilterRowTextBoxRendererExt());
 
-        this.WhenActivated(disposables =>
         {
             TypeDataGrid.ClearFilters();
 
-            this.Bind(ViewModel, x => x.SelectedMode, x => x.TabControl.SelectedIndex)
-                .DisposeWith(disposables);
 
-            this.Bind(ViewModel, x => x.EnteredText, x => x.CustomNameTextBox.Text)
-                .DisposeWith(disposables);
 
-            this.BindCommand(ViewModel, x => x.OkCommand, x => x.OkButton)
-                .DisposeWith(disposables);
 
-            this.BindCommand(ViewModel, x => x.CancelCommand, x => x.CancelButton)
-                .DisposeWith(disposables);
         });
     }
 }

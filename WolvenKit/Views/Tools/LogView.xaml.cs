@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,9 +12,7 @@ using System.Windows.Navigation;
 using DynamicData;
 using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls;
-using ReactiveUI;
 using Serilog.Events;
-using Splat;
 using WolvenKit.App;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Tools;
@@ -30,7 +27,7 @@ namespace WolvenKit.Views.Tools
     /// <summary>
     /// Interaction logic for LogView.xaml
     /// </summary>
-    public partial class LogView : ReactiveUserControl<LogViewModel>
+    public partial class LogView : System.Windows.Controls.UserControl
     {
         private ScrollViewer _scrollViewer;
         private bool _autoscroll = true;
@@ -42,34 +39,18 @@ namespace WolvenKit.Views.Tools
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<LogViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<LogViewModel>();
             DataContext = ViewModel;
 
             LogEntries.CollectionChanged += LogEntries_CollectionChanged;
 
-            var sink = Locator.Current.GetService<MySink>();
+            var sink = WolvenKit.AppImpl.Services?.GetService<MySink>();
             _ = sink.Connect()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Bind(out var _)
                 .DisposeMany()
                 .Subscribe(OnNext);
 
-            this.WhenActivated(disposables =>
-            {
-                this.OneWayBind(ViewModel, vm => vm.FilterByLevel, v => v.FilterErrorButton.Opacity, level => level[0] ? 1.0 : 0.33)
-                    .DisposeWith(disposables);
-                this.OneWayBind(ViewModel, vm => vm.FilterByLevel, v => v.FilterWarningButton.Opacity, level => level[1] ? 1.0 : 0.33)
-                    .DisposeWith(disposables);
-                this.OneWayBind(ViewModel, vm => vm.FilterByLevel, v => v.FilterSuccessButton.Opacity, level => level[2] ? 1.0 : 0.33)
-                    .DisposeWith(disposables);
-                this.OneWayBind(ViewModel, vm => vm.FilterByLevel, v => v.FilterInfoButton.Opacity, level => level[3] ? 1.0 : 0.33)
-                    .DisposeWith(disposables);
-                this.OneWayBind(ViewModel, vm => vm.FilterByLevel, v => v.FilterDebugButton.Opacity, level => level[4] ? 1.0 : 0.33)
-                    .DisposeWith(disposables);
-                this.WhenAnyValue(v => v.ViewModel.FilterByLevel)
-                    .Subscribe(_ => LogEntries_CollectionChanged(null, null))
-                    .DisposeWith(disposables);
-            });
+            // (migrated direct execution of previous reactive bits)
+            LogEntries_CollectionChanged(null, null);
         }
 
         private void LogEntries_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

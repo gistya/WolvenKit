@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using HandyControl.Tools.Extension;
-using Splat;
 using WolvenKit.App.Services;
 using WolvenKit.Modkit.Resources;
 using WolvenKit.RED4.Types;
@@ -42,8 +41,8 @@ namespace WolvenKit.Views.Editors
         public RedRefEditor()
         {
             InitializeComponent();
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
-            _archiveManager = Locator.Current.GetService<IAppArchiveManager>();
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
+            _archiveManager = WolvenKit.AppImpl.Services?.GetService<IAppArchiveManager>();
 
             FlagsComboBox.SelectionChanged += FlagsComboBox_OnSelectionChanged;
 

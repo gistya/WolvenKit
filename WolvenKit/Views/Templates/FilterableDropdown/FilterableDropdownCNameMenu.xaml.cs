@@ -1,7 +1,5 @@
-﻿using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.Templates;
@@ -18,17 +16,14 @@ namespace WolvenKit.Views.Editors
             InitializeComponent();
             _useDefaultOption = true;
 
-            this.WhenActivated(disposables =>
             {
                 if (DataContext is not ChunkViewModel vm)
                 {
                     return;
                 }
 
-                this.OneWayBind(vm,
                         v => (CName)v.Data,
                         x => x.RedCNameEditor.RedString)
-                    .DisposeWith(disposables);
 
                 InitializePropertyValues(vm);
 

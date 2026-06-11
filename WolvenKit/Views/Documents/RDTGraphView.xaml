@@ -1,6 +1,6 @@
-<reactiveUi:ReactiveUserControl
+<UserControl
     x:Class="WolvenKit.Views.Documents.RDTGraphView"
-    x:TypeArguments="documents:RDTGraphViewModel"
+   
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:WolvenKit.App.Converters;assembly=WolvenKit.App"
@@ -10,7 +10,7 @@
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:nodify="https://miroiu.github.io/nodify"
-    xmlns:reactiveUi="http://reactiveui.net"
+   
     xmlns:others="clr-namespace:WolvenKit.Views.Others"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type={x:Type documents:RDTGraphViewModel}}"
@@ -416,4 +416,4 @@
             Grid.Column="2"
             DataContext="{Binding SelectedChunk, IsAsync=True}" /-->
     </Grid>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

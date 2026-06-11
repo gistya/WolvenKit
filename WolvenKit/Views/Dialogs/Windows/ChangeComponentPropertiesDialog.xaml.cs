@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.Editors;
@@ -11,7 +9,7 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class ChangeComponentPropertiesDialog : IViewFor<ChangeComponentPropertiesDialogViewModel>
+    public partial class ChangeComponentPropertiesDialog
     {
         private static string s_lastComponentName = "";
         private static IRedPrimitive<ulong> s_lastChunkMask;
@@ -27,41 +25,27 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             LoadLastSelection();
 
-            this.WhenActivated(disposables =>
             {
                 // bind to filteredDropdownMenu
-                this.Bind(ViewModel,
                         x => x.ComponentNames,
                         x => x.FilterableDropdownMenu.Options)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.ComponentName,
                         x => x.FilterableDropdownMenu.SelectedOption)
-                    .DisposeWith(disposables);
 
                 // bind rest of properties
-                this.Bind(ViewModel,
                         x => x.DepotPath,
                         x => x.DepotPathBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.NewComponentName,
                         x => x.NewComponentNameBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.MeshAppearance,
                         x => x.MeshAppearanceNameBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.RememberValues,
                         x => x.RememberValuesCheckBox.IsChecked)
-                    .DisposeWith(disposables);
             });
         }
 
         public ChangeComponentPropertiesDialogViewModel ViewModel { get; set; }
 
-        object IViewFor.ViewModel
         {
             get => ViewModel;
             set => ViewModel = (ChangeComponentPropertiesDialogViewModel)value;

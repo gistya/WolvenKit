@@ -2,7 +2,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Tools;
 
 namespace WolvenKit.Views.Tools
@@ -10,7 +9,7 @@ namespace WolvenKit.Views.Tools
     /// <summary>
     /// Interaction logic for TweakBrowserView.xaml
     /// </summary>
-    public partial class TweakBrowserView : ReactiveUserControl<TweakBrowserViewModel>
+    public partial class TweakBrowserView : System.Windows.Controls.UserControl
     {
         public TweakBrowserViewModel Context => (TweakBrowserViewModel)DataContext;
 
@@ -18,7 +17,6 @@ namespace WolvenKit.Views.Tools
         {
             InitializeComponent();
 
-            this.WhenActivated(disposables =>
             {
                 Context.LoadTweakDB();
             });

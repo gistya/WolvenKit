@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs;
 
-public partial class ImportArgsDialog : ReactiveUserControl<ImportArgsDialogViewModel>
+public partial class ImportArgsDialog : System.Windows.Controls.UserControl
 {
     private readonly HashSet<string> _hiddenProps = [
         "Target File Format"

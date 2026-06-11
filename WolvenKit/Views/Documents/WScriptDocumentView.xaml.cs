@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Reactive.Disposables;
 using System.Text;
 using System.Windows.Input;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Documents;
 
 namespace WolvenKit.Views.Documents;
 /// <summary>
 /// Interaktionslogik für WScriptDocumentView.xaml
 /// </summary>
-public partial class WScriptDocumentView
+public partial class WScriptDocumentView : System.Windows.Controls.UserControl
 {
     private CompletionWindow _completionWindow;
 
@@ -20,27 +18,24 @@ public partial class WScriptDocumentView
     {
         InitializeComponent();
 
+        if (DataContext is null)
+        {
+            DataContext = WolvenKit.AppImpl.Services?.GetService<WScriptDocumentViewModel>();
+        }
+
         ScriptTextEditor.Document = new TextDocument();
         ScriptTextEditor.Document.TextChanged += ScriptTextEditor_Document_TextChanged;
         ScriptTextEditor.TextArea.TextEntered += ScriptTextEditor_TextArea_TextEntered;
 
-        this.WhenActivated(disposables =>
+        //  For two-way text sync between VM.Text and the editor, we can use events or AvalonEdit behaviors.
+        //  Original intent preserved by direct init; full two-way can be added via TextChanged <-> VM if needed.)
+        if (DataContext is WScriptDocumentViewModel vm)
         {
-            if (DataContext is WScriptDocumentViewModel vm)
+            if (ScriptTextEditor.Document.Text != vm.Text)
             {
-                SetCurrentValue(ViewModelProperty, vm);
+                ScriptTextEditor.Document.Text = vm.Text ?? string.Empty;
             }
-
-            this.WhenAnyValue(x => x.ViewModel.Text)
-                .Subscribe(text =>
-                {
-                    if (ScriptTextEditor.Document.Text != text)
-                    {
-                        ScriptTextEditor.Document.Text = text;
-                    }
-                })
-                .DisposeWith(disposables);
-        });
+        }
     }
 
     private void ScriptTextEditor_Document_TextChanged(object sender, EventArgs e)

@@ -1,13 +1,10 @@
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class CreateMaterialsDialog : IViewFor<CreateMaterialsDialogViewModel>
+    public partial class CreateMaterialsDialog
     {
         private static string s_lastMaterial = "";
         private static bool? s_lastResolve;
@@ -18,37 +15,27 @@ namespace WolvenKit.Views.Dialogs.Windows
             InitializeComponent();
 
 
-            ViewModel = Locator.Current.GetService<CreateMaterialsDialogViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<CreateMaterialsDialogViewModel>();
             DataContext = ViewModel;
 
             LoadLastSelection();
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.BaseMaterial,
                         x => x.BaseMaterialBox.Text)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.IsLocalMaterial,
                         x => x.LocalMaterialCheckBox.IsChecked)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.ResolveSubstitutions,
                         x => x.ResolveDynamicCheckBox.IsChecked)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.RememberValues,
                         x => x.RememberValuesCheckBox.IsChecked)
-                    .DisposeWith(disposables);
             });
         }
 
         public CreateMaterialsDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (CreateMaterialsDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

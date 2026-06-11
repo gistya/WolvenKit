@@ -1,12 +1,10 @@
 using System;
-using System.Reactive.Disposables;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App.ViewModels.Shell;
 
 namespace WolvenKit.Views.Shell
 {
-    public partial class StatusBarView : ReactiveUserControl<StatusBarViewModel>
+    public partial class StatusBarView : System.Windows.Controls.UserControl
     {
         #region Constructors
 
@@ -14,21 +12,10 @@ namespace WolvenKit.Views.Shell
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<StatusBarViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<StatusBarViewModel>();
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
-            {
-                this.OneWayBind(ViewModel,
-                        x => x.Progress,
-                        x => x.StatusBarProgressBar.Progress)
-                    .DisposeWith(disposables);
-                this.OneWayBind(ViewModel,
-                        x => x.IsIndeterminate,
-                        x => x.StatusBarProgressBar.IsIndeterminate)
-                    .DisposeWith(disposables);
-            });
-
+            // Bindings for progress moved to XAML where possible (StatusBarProgressBar.Progress / IsIndeterminate)
         }
 
         #endregion Constructors
@@ -38,7 +25,8 @@ namespace WolvenKit.Views.Shell
             base.OnMouseLeftButtonDown(e);
             if (!e.Handled)
             {
-                var mainWindow = (MainView)Locator.Current.GetService<IViewFor<AppViewModel>>();
+                // main window drag - reference self's owner or Application
+                var mainWindow = System.Windows.Application.Current?.MainWindow as MainView;
                 mainWindow?.DragMove();
             }
         }

@@ -10,8 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using HandyControl.Tools.Extension;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Interaction;
@@ -38,7 +36,7 @@ using WikiLinks = WolvenKit.Core.WikiLinks;
 
 namespace WolvenKit.Views.Documents
 {
-    public partial class RedDocumentViewMenuBar : ReactiveUserControl<RedDocumentViewToolbarModel>
+    public partial class RedDocumentViewMenuBar : System.Windows.Controls.UserControl
     {
         private readonly AppScriptService _scriptService;
         private readonly ISettingsManager _settingsManager;
@@ -58,24 +56,24 @@ namespace WolvenKit.Views.Documents
 
         public RedDocumentViewMenuBar()
         {
-            _scriptService = Locator.Current.GetService<AppScriptService>()!;
-            _settingsManager = Locator.Current.GetService<ISettingsManager>()!;
-            _projectManager = Locator.Current.GetService<IProjectManager>()!;
-            _loggerService = Locator.Current.GetService<ILoggerService>()!;
-            _archiveManager = Locator.Current.GetService<IAppArchiveManager>()!;
-            _modifierStateService = Locator.Current.GetService<IModifierViewStateService>()!;
-            _progressService = Locator.Current.GetService<IProgressService<double>>()!;
-            _projectExplorer = Locator.Current.GetService<ProjectExplorerViewModel>()!;
-            _projectResourceTools = Locator.Current.GetService<ProjectResourceTools>()!;
-            _cr2WTools = Locator.Current.GetService<Cr2WTools>()!;
-            _notificationService = Locator.Current.GetService<INotificationService>()!;
-            _cvmTools = Locator.Current.GetService<ICvmTools>()!;
+            _scriptService = WolvenKit.AppImpl.Services?.GetService<AppScriptService>()!;
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>()!;
+            _projectManager = WolvenKit.AppImpl.Services?.GetService<IProjectManager>()!;
+            _loggerService = WolvenKit.AppImpl.Services?.GetService<ILoggerService>()!;
+            _archiveManager = WolvenKit.AppImpl.Services?.GetService<IAppArchiveManager>()!;
+            _modifierStateService = WolvenKit.AppImpl.Services?.GetService<IModifierViewStateService>()!;
+            _progressService = WolvenKit.AppImpl.Services?.GetService<IProgressService<double>>()!;
+            _projectExplorer = WolvenKit.AppImpl.Services?.GetService<ProjectExplorerViewModel>()!;
+            _projectResourceTools = WolvenKit.AppImpl.Services?.GetService<ProjectResourceTools>()!;
+            _cr2WTools = WolvenKit.AppImpl.Services?.GetService<Cr2WTools>()!;
+            _notificationService = WolvenKit.AppImpl.Services?.GetService<INotificationService>()!;
+            _cvmTools = WolvenKit.AppImpl.Services?.GetService<ICvmTools>()!;
 
-            _appViewModel = Locator.Current.GetService<AppViewModel>()!;
+            _appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>()!;
 
             // Enforce instance generation and service injection. One would assume that registering a singleton
             // is enough. One would be wrong.
-            _documentTools = Locator.Current.GetService<DocumentTools>()!;
+            _documentTools = WolvenKit.AppImpl.Services?.GetService<DocumentTools>()!;
 
             InitializeComponent();
 
@@ -86,25 +84,20 @@ namespace WolvenKit.Views.Documents
                 _modifierStateService,
                 _projectManager,
                 _documentTools,
-                Locator.Current.GetService<CRUIDService>()!,
+                WolvenKit.AppImpl.Services?.GetService<CRUIDService>()!,
                 _cvmTools,
                 _loggerService) { CurrentTab = _currentTab };
             ViewModel = DataContext as RedDocumentViewToolbarModel;
 
             _modifierStateService.ModifierStateChanged += OnModifierStateChanged;
 
-            this.WhenActivated(disposable =>
+            if (DataContext is RedDocumentViewToolbarModel vm)
             {
-                if (DataContext is not RedDocumentViewToolbarModel vm)
-                {
-                    return;
-                }
-
                 vm.SetEditorLevel(_settingsManager.DefaultEditorDifficultyLevel);
                 vm.RefreshMenuVisibility(true);
 
                 vm.OnAddDependencies += OnAddDependencies;
-            });
+            }
         }
 
         private void OnModifierStateChanged() => RefreshChildMenuItems();
@@ -850,7 +843,7 @@ namespace WolvenKit.Views.Documents
                     return;
                 }
 
-                Locator.Current.GetService<ProjectExplorerViewModel>()?.SuspendFileWatcher();
+                WolvenKit.AppImpl.Services?.GetService<ProjectExplorerViewModel>()?.SuspendFileWatcher();
 
                 await AddDependenciesToFileAsync(cvm, eventArgs is AddDependenciesFullEventArgs);
                 _notificationService.Success("Successfully added dependencies");
@@ -879,7 +872,7 @@ namespace WolvenKit.Views.Documents
                     await Task.Delay(100);
                     if (_appViewModel.ActiveProject != null)
                     {
-                        Locator.Current.GetService<ProjectExplorerViewModel>()?.ResumeWatcher_AndReloadProject();
+                        WolvenKit.AppImpl.Services?.GetService<ProjectExplorerViewModel>()?.ResumeWatcher_AndReloadProject();
                     }
                 });
             }

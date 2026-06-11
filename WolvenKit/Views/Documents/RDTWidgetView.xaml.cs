@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,8 +11,6 @@ using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Tools.Extension;
 using Microsoft.Win32;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.ViewModels.Documents;
 using WolvenKit.Core.Interfaces;
@@ -26,7 +23,7 @@ namespace WolvenKit.Views.Documents
     /// <summary>
     /// Interaction logic for RDTWidgetView.xaml
     /// </summary>
-    public partial class RDTWidgetView : ReactiveUserControl<RDTWidgetViewModel>
+    public partial class RDTWidgetView : System.Windows.Controls.UserControl
     {
 
         public List<inkControl> Widgets = new();
@@ -40,25 +37,14 @@ namespace WolvenKit.Views.Documents
             InitializeComponent();
             SetupWidgetPreview();
 
-            this.WhenActivated(disposables =>
+            if (!ResourcesLoaded)
             {
-                //this.ViewModel.WhenAnyValue(x => x.library).Subscribe(library =>
-                //{
-
-                //}).DisposeWith(disposables);
-
-                this.OneWayBind(ViewModel,
-                        x => x.TextWidgets.Values,
-                        x => x.TextWidgetList.ItemsSource)
-                    .DisposeWith(disposables);
-
-                if (!ResourcesLoaded)
-                {
-                    ResourcesLoaded = true;
-                    Load();
-                }
-            });
+                ResourcesLoaded = true;
+                Load();
+            }
+            // The OneWayBind for TextWidgets to ItemsSource should be in XAML as ItemsSource="{Binding TextWidgets.Values}" if not already.
         }
+    }
 
         private void Load()
         {
@@ -95,7 +81,7 @@ namespace WolvenKit.Views.Documents
                     }
                     else
                     {
-                        Locator.Current.GetService<ILoggerService>().Warning($"LibraryItem {item.Name} did not contain any data and was skipped.");
+                        WolvenKit.AppImpl.Services?.GetService<ILoggerService>().Warning($"LibraryItem {item.Name} did not contain any data and was skipped.");
                         continue;
                     }
 

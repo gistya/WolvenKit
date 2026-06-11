@@ -1,16 +1,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Core;
 using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class SelectDropdownEntryWindow : IViewFor<SelectDropdownEntryDialogViewModel>
+    public partial class SelectDropdownEntryWindow
     {
         public SelectDropdownEntryWindow(List<string> options, string title, string text, bool showInputBar = false) :
             this(options, title, text, "", "", showInputBar)
@@ -34,16 +32,11 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.SelectedOption,
                         x => x.Dropdown.SelectedOption)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.OptionsDict,
                         x => x.Dropdown.Options)
-                    .DisposeWith(disposables);
 
                 ViewModel.SelectedOption = string.Empty;
             });
@@ -51,7 +44,6 @@ namespace WolvenKit.Views.Dialogs.Windows
 
 
         public SelectDropdownEntryDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (SelectDropdownEntryDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using Syncfusion.Windows.Controls.Input;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.ViewModels.Shell;
@@ -23,17 +21,14 @@ namespace WolvenKit.Views.Editors
             InitializeComponent();
             _useDefaultOption = true;
 
-            this.WhenActivated(disposables =>
             {
                 if (DataContext is not ChunkViewModel vm)
                 {
                     return;
                 }
 
-                this.OneWayBind(vm,
                         v => (CString)v.Data,
                         x => x.RedStringEditor.RedString)
-                    .DisposeWith(disposables);
 
                 InitializePropertyValues(vm);
 
@@ -59,7 +54,6 @@ namespace WolvenKit.Views.Editors
                 }
 
                 // Show/hide dropdown based on filter and results
-                this.WhenAnyValue(x => x.FilterText, x => x.FilteredOptions)
                     .Subscribe(tuple =>
                     {
                         var (filter, filteredOptions) = tuple;
@@ -110,7 +104,6 @@ namespace WolvenKit.Views.Editors
                             }
                         }
                     })
-                    .DisposeWith(disposables);
 
                 if (!ShowRefreshButton)
                 {

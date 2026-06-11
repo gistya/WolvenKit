@@ -1,14 +1,11 @@
 using System;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class SearchAndReplaceDialog : IViewFor<SearchAndReplaceDialogViewModel>
+    public partial class SearchAndReplaceDialog
     {
         private static string s_lastSearch = "";
         private static string s_lastReplace = "";
@@ -21,34 +18,23 @@ namespace WolvenKit.Views.Dialogs.Windows
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<SearchAndReplaceDialogViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<SearchAndReplaceDialogViewModel>();
             DataContext = ViewModel;
 
             LoadLastSelection();
             
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.SearchText,
                         x => x.SearchTextBox.Text)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.ReplaceText,
                         x => x.ReplaceTextBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.RememberValues,
                         x => x.RememberValuesCheckBox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.IsRegex,
                         x => x.IsRegexCheckbox.IsChecked)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.IsWholeWord,
                         x => x.IsWholeWordCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
                 if (ViewModel.ReplaceText != "")
                 {
@@ -58,7 +44,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public SearchAndReplaceDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (SearchAndReplaceDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

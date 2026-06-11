@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Modkit.RED4.Sounds;
 using WolvenKit.App.Extensions;
@@ -12,25 +10,18 @@ namespace WolvenKit.Views.Dialogs
     /// <summary>
     /// Interaction logic for SoundModdingView.xaml
     /// </summary>
-    public partial class SoundModdingView : ReactiveUserControl<SoundModdingViewModel>
+    public partial class SoundModdingView : System.Windows.Controls.UserControl
     {
         public SoundModdingView()
         {
             InitializeComponent();
 
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                     vm => vm.SoundEvents,
                     v => v.DataGridEvents.ItemsSource)
-                    .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel, x => x.OkCommand, x => x.OkButton)
-                    .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel, x => x.CancelCommand, x => x.CancelButton)
-                    .DisposeWith(disposables);
             });
         }
 

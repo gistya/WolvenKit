@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using ReactiveUI;
 using Syncfusion.Windows.Controls.RichTextBoxAdv;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Interaction;
@@ -13,7 +12,7 @@ using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs.Windows;
 
-public partial class DeleteOrMoveFilesListDialogView : IViewFor<DeleteOrMoveFilesListDialogViewModel>
+public partial class DeleteOrMoveFilesListDialogView
 {
     private readonly Cp77Project _currentProject;
     public object ViewModel { get; set; }
@@ -26,7 +25,6 @@ public partial class DeleteOrMoveFilesListDialogView : IViewFor<DeleteOrMoveFile
         _currentProject = currentProject;
     }
 
-    DeleteOrMoveFilesListDialogViewModel IViewFor<DeleteOrMoveFilesListDialogViewModel>.ViewModel { get; set; }
 
     public bool? ShowDialog(Window owner)
     {

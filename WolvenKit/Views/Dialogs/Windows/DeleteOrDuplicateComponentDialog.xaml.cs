@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.Editors;
@@ -12,7 +10,7 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class DeleteOrDuplicateComponentDialog : IViewFor<DeleteOrDuplicateComponentDialogViewModel>
+    public partial class DeleteOrDuplicateComponentDialog
     {
         private static string s_lastComponentName = "";
         private static string s_lastNewComponentName = "";
@@ -24,22 +22,16 @@ namespace WolvenKit.Views.Dialogs.Windows
             ViewModel = new DeleteOrDuplicateComponentDialogViewModel(componentNames, isDeleting);
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.ComponentName,
                         x => x.FilterableDropdownMenu.SelectedOption)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.ComponentNames,
                         x => x.FilterableDropdownMenu.Options)
-                    .DisposeWith(disposables);
             });
         }
 
         public DeleteOrDuplicateComponentDialogViewModel ViewModel { get; set; }
 
-        object IViewFor.ViewModel
         {
             get => ViewModel;
             set => ViewModel = (DeleteOrDuplicateComponentDialogViewModel)value;

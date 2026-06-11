@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Shell;
@@ -12,7 +11,7 @@ using WolvenKit.RED4.Types;
 
 namespace WolvenKit.Views.Templates;
 
-public abstract class FilterableDropdownMenuBase<T> : ReactiveUserControl<ChunkViewModel>
+public abstract class FilterableDropdownMenuBase<T> : System.Windows.Controls.UserControl
 {
     protected readonly DocumentTools _documentTools;
 
@@ -34,7 +33,7 @@ public abstract class FilterableDropdownMenuBase<T> : ReactiveUserControl<ChunkV
 
     protected FilterableDropdownMenuBase()
     {
-        _documentTools = Locator.Current.GetService<DocumentTools>();
+        _documentTools = WolvenKit.AppImpl.Services?.GetService<DocumentTools>();
 
         Options = [];
         FilteredOptions = [];

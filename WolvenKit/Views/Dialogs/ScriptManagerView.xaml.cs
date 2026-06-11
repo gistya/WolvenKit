@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.TreeGrid;
 using WolvenKit.App.ViewModels.Dialogs;
@@ -15,16 +13,13 @@ namespace WolvenKit.Views.Dialogs;
 /// <summary>
 /// Interaktionslogik für ScriptManagerView.xaml
 /// </summary>
-public partial class ScriptManagerView : ReactiveUserControl<ScriptManagerViewModel>
+public partial class ScriptManagerView : System.Windows.Controls.UserControl
 {
     public ScriptManagerView()
     {
         InitializeComponent();
 
-        this.WhenActivated(disposables =>
         {
-            this.BindCommand(ViewModel, viewModel => viewModel.CancelCommand, view => view.CloseButton)
-                .DisposeWith(disposables);
         });
     }
 

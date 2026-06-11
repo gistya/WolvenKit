@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using HandyControl.Tools.Extension;
-using ReactiveUI;
 using WolvenKit.App;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Models.ProjectManagement.Project;
@@ -16,7 +15,7 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs
 {
-    public partial class CreatePhotoModeAppDialog : IViewFor<CreatePhotoModeAppViewModel>
+    public partial class CreatePhotoModeAppDialog
     {
         // save dialogue values for repeated runs
         private static PhotomodeBodyGender s_lastBodyGender = PhotomodeBodyGender.Female;
@@ -64,14 +63,10 @@ namespace WolvenKit.Views.Dialogs
             };
             DataContext = ViewModel;
 
-            this.WhenActivated(_ =>
-            {
-                ViewModel?.AutoSetValues();
-            });
+            ViewModel?.AutoSetValues();
         }
 
         public CreatePhotoModeAppViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (CreatePhotoModeAppViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

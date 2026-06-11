@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Reactive.Disposables;
 using System.Windows;
 using AdonisUI.Controls;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.UI.Xaml.Grid;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Interaction;
@@ -25,242 +23,231 @@ namespace WolvenKit.Views.Shell
 {
     public class MyObservableCollection : ObservableCollection<object> { }
 
-    public partial class MainView : IViewFor<AppViewModel>
     {
-        public AppViewModel ViewModel { get; set; }
-
-        object IViewFor.ViewModel
-        {
-            get => ViewModel;
-            set => ViewModel = (AppViewModel)value;
-        }
+        public AppViewModel ViewModel { get; private set; }
 
         public MainView(ProjectResourceTools projectResourceTools, AppViewModel viewModel = null)
         {
             InitializeComponent();
             Syncfusion.UI.Xaml.Grid.AutomationPeerHelper.EnableCodedUI = true;
 
-            ViewModel = viewModel ?? Locator.Current.GetService<AppViewModel>();
+            ViewModel = viewModel ?? WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
+
+            // Register global interactions (these stay)
+            Interactions.ShowConfirmation = ShowConfirmation;
+            Interactions.ShowSaveUnsavedChangesDialog = ShowSaveUnsavedChangesDialog;
+            Interactions.ShowQuestionYesNo = ShowQuestionYesNo;
+            Interactions.ShowQuestionYesNoCancel = ShowQuestionYesNoCancel;
+            Interactions.ShowGenerateTranslationEntry = (_) =>
             {
-                Disposable.Create(() => dockingAdapter.SaveLayout()).DisposeWith(disposables);
-
-                Interactions.ShowConfirmation = ShowConfirmation;
-                Interactions.ShowSaveUnsavedChangesDialog = ShowSaveUnsavedChangesDialog;
-                Interactions.ShowQuestionYesNo = ShowQuestionYesNo;
-                Interactions.ShowQuestionYesNoCancel = ShowQuestionYesNoCancel;
-                Interactions.ShowGenerateTranslationEntry = (_) =>
+                var dialog = new LocalizationStringPopup();
+                if (dialog.ViewModel is not null && dialog.ShowDialog(this) == true)
                 {
-                    var dialog = new LocalizationStringPopup();
-                    if (dialog.ViewModel is not null && dialog.ShowDialog(this) == true)
-                    {
-                        return dialog.ViewModel;
-                    }
+                    return dialog.ViewModel;
+                }
 
+                return null;
+            };
+
+            Interactions.ShowErrorPopup = (args) =>
+            {
+                ShowConfirmation((args.text, args.caption, WMessageBoxImage.Error, WMessageBoxButtons.Ok));
+                return true;
+            };
+
+            Interactions.ShowPopupWithWeblink = ShowConfirmationWithLink;
+            Interactions.ShowDeleteOrDuplicateComponentDialogue = (args) =>
+            {
+                var dialog = new DeleteOrDuplicateComponentDialog(args.componentNames, args.isDeleting);
+                if (dialog.ViewModel is not null && dialog.ShowDialog(this) == true)
+                {
+                    return dialog.ViewModel;
+                }
+
+                return null;
+            };
+
+            Interactions.ShowLaunchProfilesView = () =>
+            {
+                LaunchProfilesView dialog = new();
+
+                if (dialog.ViewModel is not null && dialog.ShowDialog(this) == true)
+                {
+                    ViewModel?.SetLaunchProfiles(dialog.ViewModel.LaunchProfiles);
+                }
+
+                return true;
+            };
+
+            Interactions.ShowArchiveXlFilesView = currentProject =>
+            {
+                AddArchiveXlFilesDialog dialog = new(currentProject);
+
+                if (dialog.ShowDialog(this) != true)
+                {
                     return null;
-                };
+                }
 
-                Interactions.ShowErrorPopup = (args) =>
+                return dialog.ViewModel?.CollectItemInfo();
+            };
+
+            Interactions.ShowNewPlayerHeadView = () =>
+            {
+                ShowNewPlayerHeadDialog dialog = new();
+
+                if (dialog.ShowDialog(this) != true)
                 {
-                    ShowConfirmation((args.text, args.caption, WMessageBoxImage.Error, WMessageBoxButtons.Ok));
-                    return true;
-                };
-
-                Interactions.ShowPopupWithWeblink = ShowConfirmationWithLink;
-                Interactions.ShowDeleteOrDuplicateComponentDialogue = (args) =>
-                {
-                    var dialog = new DeleteOrDuplicateComponentDialog(args.componentNames, args.isDeleting);
-                    if (dialog.ViewModel is not null && dialog.ShowDialog(this) == true)
-                    {
-                        return dialog.ViewModel;
-                    }
-
                     return null;
-                };
+                }
 
-                Interactions.ShowLaunchProfilesView = () =>
+                return dialog.ViewModel;
+            };
+
+            Interactions.ShowSelectSaveView = currentSaveGame =>
+            {
+                SaveGameSelectionDialog dialog = new(currentSaveGame);
+
+                if (dialog.ShowDialog(this) == true)
                 {
-                    LaunchProfilesView dialog = new();
+                    return dialog.ViewModel?.SelectedEntry?.DirName;
+                }
 
-                    if (dialog.ViewModel is not null && dialog.ShowDialog(this) == true)
-                    {
-                        ViewModel.SetLaunchProfiles(dialog.ViewModel.LaunchProfiles);
-                    }
+                return null;
+            };
 
-                    return true;
-                };
+            Interactions.ShowMaterialRepositoryView = () =>
+            {
+                MaterialsRepositoryView dialog = new();
 
-                Interactions.ShowArchiveXlFilesView = currentProject =>
+                if (dialog.ShowDialog(this) == true)
                 {
-                    AddArchiveXlFilesDialog dialog = new(currentProject);
+                }
 
-                    if (dialog.ShowDialog(this) != true)
-                    {
-                        return null;
-                    }
+                return true;
+            };
 
-                    return dialog.ViewModel?.CollectItemInfo();
-                };
+            Interactions.CreateOrEditRadioDialog = project =>
+            {
+                AddRadioExtFilesDialog dialog = new(project, ViewModel?.TemplateFileTools);
 
-
-                Interactions.ShowNewPlayerHeadView = () =>
+                if (dialog.ShowDialog(this) != true)
                 {
-                    ShowNewPlayerHeadDialog dialog = new();
-
-                    if (dialog.ShowDialog(this) != true)
-                    {
-                        return null;
-                    }
-
-                    return dialog.ViewModel;
-                };
-
-                Interactions.ShowSelectSaveView = currentSaveGame =>
-                {
-                    SaveGameSelectionDialog dialog = new(currentSaveGame);
-
-                    if (dialog.ShowDialog(this) == true)
-                    {
-                        return dialog.ViewModel?.SelectedEntry?.DirName;
-                    }
-
                     return null;
-                };
+                }
 
-                Interactions.ShowMaterialRepositoryView = () =>
+                return dialog.ViewModel;
+            };
+
+            Interactions.ShowCollectionView = input =>
+            {
+                ChooseCollectionView dialog = new();
+                if (input.availableItems is not null)
                 {
-                    MaterialsRepositoryView dialog = new();
+                    dialog.ViewModel?.SetAvailableItems(input.availableItems);
+                }
 
-                    if (dialog.ShowDialog(this) == true)
-                    {
-                    }
-
-                    return true;
-                };
-
-                Interactions.CreateOrEditRadioDialog = project =>
+                if (input.selectedItems is not null)
                 {
-                    AddRadioExtFilesDialog dialog = new(project, ViewModel.TemplateFileTools);
+                    dialog.ViewModel?.SetSelectedItems(input.selectedItems);
+                }
 
-                    if (dialog.ShowDialog(this) != true)
-                    {
-                        return null;
-                    }
-
-                    return dialog.ViewModel;
-                };
-
-                Interactions.ShowCollectionView = input =>
+                IEnumerable<IDisplayable> result = null;
+                if (dialog.ShowDialog(this) == true && dialog.ViewModel is not null)
                 {
-                    ChooseCollectionView dialog = new();
-                    if (input.availableItems is not null)
-                    {
-                        dialog.ViewModel?.SetAvailableItems(input.availableItems);
-                    }
+                    result = dialog.ViewModel.SelectedItems;
+                }
 
-                    if (input.selectedItems is not null)
-                    {
-                        dialog.ViewModel?.SetSelectedItems(input.selectedItems);
-                    }
+                return result;
+            };
 
-                    IEnumerable<IDisplayable> result = null;
-                    if (dialog.ShowDialog(this) == true && dialog.ViewModel is not null)
-                    {
-                        result = dialog.ViewModel.SelectedItems;
-                    }
-
-                    return result;
-                };
-
-                Interactions.ShowPhotoModeDialogue = (p) =>
+            Interactions.ShowPhotoModeDialogue = (p) =>
+            {
+                var dialog = new CreatePhotoModeAppDialog(p.activeProject, p.settingsManager, projectResourceTools);
+                if (dialog.ShowDialog() != true)
                 {
-                    var dialog = new CreatePhotoModeAppDialog(p.activeProject, p.settingsManager, projectResourceTools);
-                    if (dialog.ShowDialog() != true)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    return dialog.ViewModel;
-                };
+                return dialog.ViewModel;
+            };
 
-                Interactions.ShowGenerateInkatlasDialogue = (activeProject) =>
+            Interactions.ShowGenerateInkatlasDialogue = (activeProject) =>
+            {
+                var dialog = new AddInkatlasDialog(activeProject);
+                if (dialog.ShowDialog() != true)
                 {
-                    var dialog = new AddInkatlasDialog(activeProject);
-                    if (dialog.ShowDialog() != true)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    return dialog.ViewModel;
-                };
+                return dialog.ViewModel;
+            };
 
-                Interactions.ShowGeneratePropFileModel = (activeProject) =>
+            Interactions.ShowGeneratePropFileModel = (activeProject) =>
+            {
+                var dialog = new AddPropFileDialog(activeProject);
+                if (dialog.ShowDialog() != true)
                 {
-                    var dialog = new AddPropFileDialog(activeProject);
-                    if (dialog.ShowDialog() != true)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    return dialog.ViewModel;
-                };
+                return dialog.ViewModel;
+            };
 
-                Interactions.ShowCopyMeshAppearancesDialogue = (options) =>
+            Interactions.ShowCopyMeshAppearancesDialogue = (options) =>
+            {
+                var dialog = new CopyMeshAppearancesDialog(options);
+                if (dialog.ShowDialog() != true)
                 {
-                    var dialog = new CopyMeshAppearancesDialog(options);
-                    if (dialog.ShowDialog() != true)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    return dialog.ViewModel;
-                };
+                return dialog.ViewModel;
+            };
 
-                Interactions.ShowChecklistDialogue = (args) =>
+            Interactions.ShowChecklistDialogue = (args) =>
+            {
+                var dialog = new ShowChecklistDialog(args);
+                if (dialog.ShowDialog() != true)
                 {
-                    var dialog = new ShowChecklistDialog(args);
-                    if (dialog.ShowDialog() != true)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    return dialog.ViewModel;
-                };
+                return dialog.ViewModel;
+            };
 
-                Interactions.AddItemsToStore = (project) =>
+            Interactions.AddItemsToStore = (project) =>
+            {
+                var dialog = new AddItemsToStoreDialog(project);
+                if (dialog.ShowDialog() != true)
                 {
-                    var dialog = new AddItemsToStoreDialog(project);
-                    if (dialog.ShowDialog() != true)
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    return dialog.ViewModel;
-                };
+                return dialog.ViewModel;
+            };
 
-                Interactions.ShowScriptSettingsView = settings =>
+            Interactions.ShowScriptSettingsView = settings =>
+            {
+                var dialog = new ScriptSettingsWindow(settings);
+                return dialog.ShowDialog() == true;
+            };
+
+            // ActiveProject change notification (replaces WhenAnyValue subscription)
+            if (ViewModel != null)
+            {
+                ViewModel.PropertyChanged += (_, e) =>
                 {
-                    var dialog = new ScriptSettingsWindow(settings);
-                    return dialog.ShowDialog() == true;
+                    if (e.PropertyName == nameof(AppViewModel.ActiveProject))
+                    {
+                        dockingAdapter.OnActiveProjectChanged();
+                    }
                 };
+            }
 
-
-                this.Bind(ViewModel,
-                    vm => vm.ActiveDocument,
-                    v => v.dockingAdapter.ActiveDocument)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
-                    vm => vm.DockedViews,
-                    v => v.dockingAdapter.ItemsSource)
-                    .DisposeWith(disposables);
-
-                this.WhenAnyValue(x => x.ViewModel.ActiveProject).Subscribe(_ => dockingAdapter.OnActiveProjectChanged());
-
-                //set ready status
-                ViewModel.SetStatusReady();
-            });
+            //set ready status
+            ViewModel?.SetStatusReady();
         }
 
         private void FadeOut_Completed(object sender, EventArgs e) => ViewModel?.FinishedClosingModal();
@@ -368,7 +355,7 @@ namespace WolvenKit.Views.Shell
         private void Overlay_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
-            var mainWindow = (MainView)Locator.Current.GetService<IViewFor<AppViewModel>>();
+            var mainWindow = this; // self, since we are the main window now
             if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
             {
                 mainWindow?.DragMove();
@@ -395,24 +382,23 @@ namespace WolvenKit.Views.Shell
                 p.EffectsManager.Dispose();
             }
 
-            if (Locator.Current.GetService<IProjectManager>() is ProjectManager pm)
+            if (WolvenKit.AppImpl.Services?.GetService<IProjectManager>() is ProjectManager pm)
             {
                 pm.Save();
             }
 
-            if (Locator.Current.GetService<IHashService>() is HashServiceExt hashServiceExt)
+            if (WolvenKit.AppImpl.Services?.GetService<IHashService>() is HashServiceExt hashServiceExt)
             {
                 hashServiceExt.SaveGlobalCache();
             }
 
-            if (Locator.Current.GetService<CRUIDService>() is { } cs)
+            if (WolvenKit.AppImpl.Services?.GetService<CRUIDService>() is { } cs)
             {
                 cs.SaveUserCRUIDS();
             }
             Application.Current.Shutdown();
         }
 
-        // This is called before this.WhenActivated
         private void ChromelessWindow_Loaded(object sender, RoutedEventArgs e) { }
 
         // This is never called

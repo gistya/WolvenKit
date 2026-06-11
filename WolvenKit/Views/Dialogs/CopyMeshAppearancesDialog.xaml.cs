@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
-using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Windows.Controls;
 using WolvenKit.App.ViewModels.Dialogs;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
@@ -11,7 +9,7 @@ using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs
 {
-    public partial class CopyMeshAppearancesDialog : IViewFor<CopyMeshAppearancesDialogViewModel>
+    public partial class CopyMeshAppearancesDialog
     {
         private static List<string> s_lastSelectedOptions = [];
         private static string s_lastSelectedOption = "";
@@ -27,21 +25,15 @@ namespace WolvenKit.Views.Dialogs
             };
             DataContext = ViewModel;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.SelectedOption,
                         x => x.TextBox.Text)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.OptionsDict,
                         x => x.FilterableChecklistMenu.CheckboxOptionsAndStates)
-                    .DisposeWith(disposables);
             });
         }
 
         public CopyMeshAppearancesDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (CopyMeshAppearancesDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

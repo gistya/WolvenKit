@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using WolvenKit.RED4.Types;
 
 namespace WolvenKit.Views.Editors

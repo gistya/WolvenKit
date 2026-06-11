@@ -1,6 +1,6 @@
-<reactiveUi:ReactiveUserControl
+<UserControl
     x:Class="WolvenKit.Views.HomePage.Pages.PluginsToolView"
-    x:TypeArguments="homepage:PluginsToolViewModel"
+   
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,7 +8,7 @@
     xmlns:homepage="clr-namespace:WolvenKit.App.ViewModels.HomePage.Pages;assembly=WolvenKit.App"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:reactiveUi="http://reactiveui.net"
+   
     xmlns:shared="clr-namespace:Syncfusion.Windows.Shared;assembly=Syncfusion.Shared.WPF"
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     mc:Ignorable="d"
@@ -201,4 +201,4 @@
             </ListBox.ItemTemplate>
         </ListBox>
     </Grid>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

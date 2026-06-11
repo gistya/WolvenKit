@@ -19,7 +19,6 @@ using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.App.Interaction;
-using Splat;
 using WolvenKit.Views.Dialogs;
 using WolvenKit.Views.GraphEditor;
 using WolvenKit.Core.Interfaces;
@@ -88,10 +87,9 @@ namespace WolvenKit.Views.Documents
             // Clean up any existing subscription first
             CleanupEventSubscription();
             
-            _appViewModel = Locator.Current.GetService<AppViewModel>();
+            _appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
             if (_appViewModel != null)
             {
-                _appViewModel.PropertyChanged += OnAppViewModelPropertyChanged;
                 _lastActiveDocument = _appViewModel.ActiveDocument;
             }
         }
@@ -103,7 +101,6 @@ namespace WolvenKit.Views.Documents
         {
             if (_appViewModel != null)
             {
-                _appViewModel.PropertyChanged -= OnAppViewModelPropertyChanged;
                 _appViewModel.DockedViews.CollectionChanged -= OnDockedViewsCollectionChanged;
                 _appViewModel = null;
             }
@@ -273,7 +270,6 @@ namespace WolvenKit.Views.Documents
         /// <summary>
         /// Handle document switching to deselect nodes when switching between quest phase and scene documents
         /// </summary>
-        private void OnAppViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (_disposed || e.PropertyName != nameof(AppViewModel.ActiveDocument) || _appViewModel == null)
             {
@@ -1184,7 +1180,7 @@ namespace WolvenKit.Views.Documents
 
             try
             {
-                if (Locator.Current.GetService<AppViewModel>() is not { } appViewModel)
+                if (WolvenKit.AppImpl.Services?.GetService<AppViewModel>() is not { } appViewModel)
                 {
                     return;
                 }
@@ -1401,7 +1397,7 @@ namespace WolvenKit.Views.Documents
                 // Open the scene file in Scene Editor and automatically switch to it
                 try
                 {
-                    var appViewModel = Locator.Current.GetService<AppViewModel>();
+                    var appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
                     if (appViewModel != null)
                     {
                         // Open the file

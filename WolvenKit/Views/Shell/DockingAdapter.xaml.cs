@@ -5,15 +5,12 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xml;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.Windows.Tools.Controls;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Models.Docking;
@@ -45,12 +42,12 @@ namespace WolvenKit.Views.Shell
 
         public DockingAdapter()
         {
-            _logger = Locator.Current.GetService<ILoggerService>();
+            _logger = WolvenKit.AppImpl.Services?.GetService<ILoggerService>();
 
             InitializeComponent();
             G_Dock = this;
 
-            _viewModel = DataContext as AppViewModel ?? Locator.Current.GetService<AppViewModel>();
+            _viewModel = DataContext as AppViewModel ?? WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
 
             if (_viewModel is not null)
             {
@@ -459,7 +456,7 @@ namespace WolvenKit.Views.Shell
                     dockElement.IsActive = true;
                 }
 
-                var propertiesViewModel = Locator.Current.GetService<PropertiesViewModel>();
+                var propertiesViewModel = WolvenKit.AppImpl.Services?.GetService<PropertiesViewModel>();
                 switch (content.Content)
                 {
                     case ProjectExplorerViewModel { SelectedItem: not null } pevm:
@@ -648,10 +645,7 @@ namespace WolvenKit.Views.Shell
                     continue;
                 }
 
-                // use normal events here?
-                dockElement.ObservableForProperty(x => x.State)
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(OnStateUpdated);
+                SubscribeToDockElementChanges(dockElement);
 
                 // add control
                 var control = new ContentControl() { Content = item };
@@ -716,13 +710,7 @@ namespace WolvenKit.Views.Shell
                     continue;
                 }
 
-                // use normal events here?
-                element.ObservableForProperty(x => x.Header)
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(OnHeaderChanged);
-                element.ObservableForProperty(x => x.State)
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(OnStateUpdated);
+                SubscribeToDockElementChanges(element);
 
                 // add control
                 var control = new ContentControl() { Content = element };
@@ -748,11 +736,34 @@ namespace WolvenKit.Views.Shell
             }
         }
 
-        private void OnHeaderChanged(IObservedChange<IDockElement, string> headerChange)
+        private void SubscribeToDockElementChanges(IDockElement dockElement)
         {
-            var item = headerChange.Sender;
-            var newHeader = headerChange.Value;
+            if (dockElement is not INotifyPropertyChanged inpc)
+            {
+                return;
+            }
 
+            inpc.PropertyChanged += (s, e) =>
+            {
+                if (s is not IDockElement el)
+                {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(IDockElement.Header))
+                {
+                    OnHeaderChanged(el);
+                }
+
+                if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(IDockElement.State))
+                {
+                    OnStateUpdated(el);
+                }
+            };
+        }
+
+        private void OnHeaderChanged(IDockElement item)
+        {
             var control = (from ContentControl element in PART_DockingManager.Children
                            where element.Content == item
                            select element).FirstOrDefault();
@@ -763,6 +774,7 @@ namespace WolvenKit.Views.Shell
             }
 
             var header = DockingManager.GetHeader(control) as string;
+            var newHeader = item.Header;
 
             if (header is string headerStr && !headerStr.Equals(newHeader))
             {
@@ -770,14 +782,13 @@ namespace WolvenKit.Views.Shell
             }
         }
 
-        private void OnStateUpdated(IObservedChange<IDockElement, DockState> dockStateChange)
+        private void OnStateUpdated(IDockElement item)
         {
-            var item = dockStateChange.Sender;
             var control = (from ContentControl element in PART_DockingManager.Children
                            where element.Content == item
                            select element).FirstOrDefault();
 
-            var newstate = dockStateChange.Value;
+            var newstate = item.State;
             // actually remove and not hide FloatingPaneViewModels
             if (control is { Content: FloatingPaneViewModel vm } && newstate == DockState.Hidden)
             {

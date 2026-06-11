@@ -1,6 +1,4 @@
 using System.Linq;
-using ReactiveUI;
-using Splat;
 using Syncfusion.UI.Xaml.Grid;
 using WolvenKit.App.Extensions;
 using WolvenKit.App.ViewModels.HomePage.Pages;
@@ -10,13 +8,13 @@ namespace WolvenKit.Views.HomePage.Pages
     /// <summary>
     /// Interaction logic for ModsView.xaml
     /// </summary>
-    public partial class ModsView : ReactiveUserControl<ModsViewModel>
+    public partial class ModsView : System.Windows.Controls.UserControl
     {
         public ModsView()
         {
             InitializeComponent();
 
-            ViewModel = Locator.Current.GetService<ModsViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<ModsViewModel>();
             DataContext = ViewModel;
 
             DataGridEvents.RowDragDropController.Dropped += RowDragDropController_Dropped;

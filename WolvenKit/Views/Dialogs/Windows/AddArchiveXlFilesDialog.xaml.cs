@@ -2,13 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using ReactiveUI;
 using Syncfusion.Windows.Controls.Input;
 using WolvenKit.App;
 using WolvenKit.App.Models.ProjectManagement.Project;
@@ -20,7 +18,7 @@ using WolvenKit.ViewModels.Validators;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class AddArchiveXlFilesDialog : IViewFor<AddArchiveXlFilesDialogViewModel>
+    public partial class AddArchiveXlFilesDialog
     {
         public AddArchiveXlFilesDialog(Cp77Project currentProject)
         {
@@ -31,12 +29,9 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.ItemName,
                         x => x.ItemNameTextBox.Text)
-                    .DisposeWith(disposables);
 
                 ItemSubtypeControl.SetCurrentValue(IsEnabledProperty, false);
                 EquipmentExControl.SetCurrentValue(IsEnabledProperty, false);
@@ -44,7 +39,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public AddArchiveXlFilesDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (AddArchiveXlFilesDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {

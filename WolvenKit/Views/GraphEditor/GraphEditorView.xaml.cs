@@ -12,8 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Nodify;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.App.ViewModels.GraphEditor;
@@ -105,13 +104,12 @@ public partial class GraphEditorView : UserControl
     {
         InitializeComponent();
 
-        _appViewModel = Locator.Current.GetService<AppViewModel>();
+        _appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
 
         Observable.FromEventPattern<RoutedEventHandler, RoutedEventArgs>(
             handler => Editor.ViewportUpdated += handler,
             handler => Editor.ViewportUpdated -= handler)
             .Throttle(TimeSpan.FromSeconds(1))
-            .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(x =>
             {
                 ViewportUpdated();

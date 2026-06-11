@@ -1,11 +1,9 @@
-<reactiveUi:ReactiveUserControl
+<UserControl
     x:Class="WolvenKit.Views.Shell.RibbonView"
-    x:TypeArguments="shell:RibbonViewModel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:reactiveUi="http://reactiveui.net"
     xmlns:shared="clr-namespace:Syncfusion.Windows.Shared;assembly=Syncfusion.Shared.WPF"
     xmlns:shell="clr-namespace:WolvenKit.App.ViewModels.Shell;assembly=WolvenKit.App"
     xmlns:local="clr-namespace:WolvenKit.Views.Shell"
@@ -223,6 +221,7 @@
                 Background="Transparent">
                 <Button
                     x:Name="ToolbarNewButton"
+                    Command="{Binding MainViewModel.NewFileCommand}"
                     ToolTip="New File">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -238,6 +237,7 @@
 
                 <Button
                     x:Name="ToolbarSaveButton"
+                    Command="{Binding MainViewModel.SaveFileCommand}"
                     ToolTip="Save Current File">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -253,6 +253,7 @@
 
                 <Button
                     x:Name="ToolbarSaveAsButton"
+                    Command="{Binding MainViewModel.SaveAsCommand}"
                     ToolTip="Save File">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -268,6 +269,7 @@
 
                 <Button
                     x:Name="ToolbarSaveAllButton"
+                    Command="{Binding MainViewModel.SaveAllCommand}"
                     ToolTip="Save All Files">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -289,6 +291,7 @@
                 <!-- Button: Pack as REDmod -->
                 <Button
                     x:Name="ToolbarPackProjectButton"
+                    Command="{Binding MainViewModel.PackRedModCommand}"
                     Visibility="{Binding ShowRedmodInRibbon,
                                          Converter={StaticResource BooleanToVisibilityConverter}}"
                     ToolTip="Pack as zip file for Nexus upload, REDmod format">
@@ -307,6 +310,7 @@
                 <!-- Button: Install as REDMod -->
                 <Button
                     x:Name="ToolbarPackInstallRedmodButton"
+                    Command="{Binding MainViewModel.PackInstallRedModCommand}"
                     Visibility="{Binding ShowRedmodInRibbon,
                                          Converter={StaticResource BooleanToVisibilityConverter}}"
                     ToolTip="Pack as REDmod &amp; install to game. Hold SHIFT to trigger deploy. Not supported by HotReload.">
@@ -327,6 +331,7 @@
                 <!-- "Pack" button -->
                 <Button
                     x:Name="ToolbarPackProjectLegacyButton"
+                    Command="{Binding MainViewModel.PackModCommand}"
                     ToolTip="Pack as zip file for Nexus upload">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -343,6 +348,7 @@
                 <!-- Install button -->
                 <Button
                     x:Name="ToolbarPackInstallLegacyButton"
+                    Command="{Binding MainViewModel.PackInstallModCommand}"
                     ToolTip="Install mod to game directory">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -384,6 +390,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Button
                                     x:Name="LaunchProfileButton"
+                                    Command="{Binding LaunchProfileCommand}"
                                     Style="{StaticResource ButtonChromelessStyle}"
                                     ToolTip="Start from launch profile (configure in 'Launch Profiles')">
                                     <StackPanel Orientation="Horizontal">
@@ -396,7 +403,8 @@
                                         <TextBlock
                                             x:Name="LaunchProfileText"
                                             Padding="{DynamicResource WolvenKitMarginTinyRight}"
-                                            VerticalAlignment="Center" />
+                                            VerticalAlignment="Center"
+                                            Text="{Binding LaunchProfileText}" />
                                     </StackPanel>
                                 </Button>
 
@@ -417,6 +425,7 @@
                         <!-- Launch Profiles -->
                         <MenuItem
                             x:Name="LaunchOptionsMenuItem"
+                            Command="{Binding MainViewModel.LaunchOptionsCommand}"
                             Header="{x:Static local:RibbonView.LaunchProfilesString}">
                             <MenuItem.Icon>
                                 <templates:IconBox
@@ -434,6 +443,7 @@
                 <!-- Button: Hot Reload -->
                 <Button
                     x:Name="ToolbarHotInstallButton"
+                    Command="{Binding MainViewModel.HotInstallModCommand}"
                     ToolTip="Install to Game Directory (HotReload Plugin required)">
                     <StackPanel Orientation="Horizontal">
                         <templates:IconBox
@@ -449,4 +459,4 @@
             </ToolBar>
         </ToolBarTray>
     </Grid>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

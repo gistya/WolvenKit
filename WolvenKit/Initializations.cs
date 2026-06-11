@@ -7,8 +7,7 @@ using System.Windows.Media;
 using System.Xml;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Themes.MaterialDark.WPF;
 using WolvenKit.App.Helpers;
@@ -68,14 +67,13 @@ namespace WolvenKit
 
         public static void InitializeShell(ISettingsManager settingsManager)
         {
-            // Set service locator.
-            var mainWindow = Locator.Current.GetService<IViewFor<AppViewModel>>();
-
             GcHelper.CleanupMemory();
 
-            if (mainWindow is MainView window)
+            // Resolve main view via MS DI (after ReactiveUI IViewFor removal)
+            var mainWindow = AppImpl.Services?.GetService<MainView>();
+            if (mainWindow is not null)
             {
-                window.Show();
+                mainWindow.Show();
             }
 
             if (WolvenDBG.EnableTheming)

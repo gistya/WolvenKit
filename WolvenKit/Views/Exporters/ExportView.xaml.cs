@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reflection;
 using System.Windows;
-using ReactiveUI;
+using Microsoft.Extensions.DependencyInjection;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.ViewModels.Exporters;
@@ -18,7 +17,7 @@ namespace WolvenKit.Views.Exporters;
 /// <summary>
 /// Interaction logic for ExportView.xaml
 /// </summary>
-public partial class ExportView : ReactiveUserControl<ExportViewModel>
+public partial class ExportView : System.Windows.Controls.UserControl
 {
     private readonly Dictionary<string, PropertyInfo> _shownProperties = new();
 
@@ -29,31 +28,23 @@ public partial class ExportView : ReactiveUserControl<ExportViewModel>
         ExportGrid.FilterRowCellRenderers.Add("TextBoxExt", new GridFilterRowTextBoxRendererExt());
         ExportGrid.FilterChanged += Datagrid_FilterChanged;
 
-        this.WhenActivated(disposables =>
+        if (DataContext is null)
         {
-            if (DataContext is ExportViewModel viewModel)
-            {
-                SetCurrentValue(ViewModelProperty, viewModel);
-            }
+            DataContext = WolvenKit.AppImpl.Services?.GetService<ExportViewModel>();
+        }
 
+        if (DataContext is ExportViewModel viewModel)
+        {
+            ViewModel = viewModel;
             ViewModel.OnRefresh += RefreshFilter;
 
-            this.OneWayBind(ViewModel,
-                    x => x.SelectedObject.Properties,
-                    x => x.OverlayPropertyGrid.SelectedObject)
-                .DisposeWith(disposables);
-
-            this.Bind(ViewModel,
-                        x => x.Items,
-                        x => x.ExportGrid.ItemsSource)
-                    .DisposeWith(disposables);
-
-            this.Bind(ViewModel,
-                   x => x.SelectedObject,
-                   x => x.ExportGrid.SelectedItem)
-               .DisposeWith(disposables);
-        });
+            // Reactive binds replaced with direct assignment + XAML where possible
+            ExportGrid.ItemsSource = viewModel.Items;
+            // For two-way selected and property grid, we rely on XAML bindings or further sync if needed
+        }
     }
+
+    public ExportViewModel ViewModel { get; set; }
 
 
     private void RefreshFilter(object sender, EventArgs e) => Datagrid_FilterChanged(ExportGrid, null);

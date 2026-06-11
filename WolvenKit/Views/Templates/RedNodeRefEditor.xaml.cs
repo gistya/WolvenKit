@@ -7,8 +7,6 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ReactiveUI;
-using Splat;
 using WolvenKit.App.Services;
 using WolvenKit.RED4.Types;
 
@@ -25,7 +23,7 @@ namespace WolvenKit.Views.Editors
         {
             InitializeComponent();
 
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
         }
 
         public NodeRef RedNodeRef

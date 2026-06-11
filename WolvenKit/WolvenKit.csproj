@@ -55,7 +55,6 @@
     <PackageReference Include="Nodify" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
-    <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" />
     <PackageReference Include="Serilog.Sinks.Async" />
     <PackageReference Include="SharpVectors.Wpf" />
     <PackageReference Include="Splat" />
@@ -64,8 +63,7 @@
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
 
-    <PackageReference Include="ReactiveUI" />
-    <PackageReference Include="ReactiveUI.WPF" />
+    <!-- ReactiveUI removed; views migrated to standard WPF MVVM + DataTemplates + DI -->
   </ItemGroup>
 
 

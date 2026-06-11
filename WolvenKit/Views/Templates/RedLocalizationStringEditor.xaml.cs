@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Splat;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Interaction;
 using WolvenKit.App.Services;
@@ -36,10 +35,10 @@ public partial class RedLocalizationStringEditor : UserControl
     {
         InitializeComponent();
 
-        _projectManager = Locator.Current.GetService<IProjectManager>();
-        _cr2wTools = Locator.Current.GetService<Cr2WTools>();
-        _projectResourceTools = Locator.Current.GetService<ProjectResourceTools>();
-        _appViewModel = Locator.Current.GetService<App.ViewModels.Shell.AppViewModel>();
+        _projectManager = WolvenKit.AppImpl.Services?.GetService<IProjectManager>();
+        _cr2wTools = WolvenKit.AppImpl.Services?.GetService<Cr2WTools>();
+        _projectResourceTools = WolvenKit.AppImpl.Services?.GetService<ProjectResourceTools>();
+        _appViewModel = WolvenKit.AppImpl.Services?.GetService<App.ViewModels.Shell.AppViewModel>();
     }
 
     public string Unk1

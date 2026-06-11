@@ -1,10 +1,10 @@
-<reactiveUi:ReactiveUserControl
+<UserControl
     x:Class="WolvenKit.Views.HomePage.Pages.WelcomePageView"
-    x:TypeArguments="shared:WelcomePageViewModel"
+   
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-    xmlns:reactiveUi="http://reactiveui.net"
+   
     xmlns:shared="clr-namespace:WolvenKit.App.ViewModels.HomePage.Pages;assembly=WolvenKit.App"
     xmlns:converters="clr-namespace:WolvenKit.Converters"
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf">
@@ -439,12 +439,14 @@
 
                             <TextBox
                                 x:Name="PinnedFilter"
+                                Text="{Binding PinnedFilter, UpdateSourceTrigger=PropertyChanged}"
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 Width="{DynamicResource WolvenKitWelcomeOrderWidth}" />
 
                             <ComboBox
                                 x:Name="PinnedOrder"
+                                SelectedValue="{Binding SelectedPinnedOrder, Mode=TwoWay}"
                                 Grid.Row="0"
                                 Grid.Column="1"
                                 Width="{DynamicResource WolvenKitWelcomeOrderWidth}"
@@ -538,12 +540,14 @@
 
                             <TextBox
                                 x:Name="RecentFilter"
+                                Text="{Binding RecentFilter, UpdateSourceTrigger=PropertyChanged}"
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 Width="{DynamicResource WolvenKitWelcomeOrderWidth}" />
 
                             <ComboBox
                                 x:Name="RecentOrder"
+                                SelectedValue="{Binding SelectedRecentOrder, Mode=TwoWay}"
                                 Grid.Row="0"
                                 Grid.Column="1"
                                 Width="{DynamicResource WolvenKitWelcomeOrderWidth}"
@@ -586,6 +590,7 @@
                         <StackPanel>
                             <Button
                                 x:Name="NewProjectButton"
+                                Command="{Binding NewProjectCommand}"
                                 AutomationProperties.AutomationId="NewProjectButton"
                                 Height="{DynamicResource WolvenKitWelcomeButtonHeight}"
                                 Margin="{DynamicResource WolvenKitWelcomeButtonMargin}"
@@ -623,6 +628,7 @@
 
                             <Button
                                 x:Name="OpenProjectButton"
+                                Command="{Binding OpenProjectCommand}"
                                 Height="{DynamicResource WolvenKitWelcomeButtonHeight}"
                                 Margin="{DynamicResource WolvenKitWelcomeButtonMargin}"
                                 Padding="{DynamicResource WolvenKitWelcomeButtonPadding}"
@@ -659,6 +665,7 @@
 
                             <Button
                                 x:Name="ContinueWithoutProjectButton"
+                                Command="{Binding CloseHomePageCommand}"
                                 Height="{DynamicResource WolvenKitWelcomeButtonHeight}"
                                 Margin="{DynamicResource WolvenKitWelcomeButtonMargin}"
                                 Padding="{DynamicResource WolvenKitWelcomeButtonPadding}"
@@ -731,6 +738,8 @@
 
                                 <Button
                                     x:Name="DiscordLinkButton"
+                                    Command="{Binding OpenLinkCommand}"
+                                    CommandParameter="{Binding DiscordLink}"
                                     Height="{DynamicResource WolvenKitWelcomeSocialButtonHeight}"
                                     Margin="0,0,4,0"
                                     HorizontalAlignment="Stretch"
@@ -755,6 +764,8 @@
 
                                 <Button
                                     x:Name="YoutubeLinkButton"
+                                    Command="{Binding OpenLinkCommand}"
+                                    CommandParameter="{Binding YoutubeLink}"
                                     Grid.Column="1"
                                     Height="{DynamicResource WolvenKitWelcomeSocialButtonHeight}"
                                     Margin="4,0,0,0"
@@ -808,6 +819,8 @@
 
                                 <Button
                                     x:Name="OpenCollectiveLinkButton"
+                                    Command="{Binding OpenLinkCommand}"
+                                    CommandParameter="{Binding OpenCollectiveLink}"
                                     Height="{DynamicResource WolvenKitWelcomeSocialButtonHeight}"
                                     Margin="0,0,4,0"
                                     HorizontalAlignment="Stretch"
@@ -832,6 +845,8 @@
 
                                 <Button
                                     x:Name="PatreonLinkButton"
+                                    Command="{Binding OpenLinkCommand}"
+                                    CommandParameter="{Binding PatreonLink}"
                                     Grid.Column="1"
                                     Height="{DynamicResource WolvenKitWelcomeSocialButtonHeight}"
                                     Margin="4,0,0,0"
@@ -861,4 +876,4 @@
             </Grid>
         </Grid>
     </ScrollViewer>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Splat;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
@@ -14,12 +13,12 @@ namespace WolvenKit.Views.Editors
     {
         private readonly DocumentTools _documentTools;
         private static ILoggerService s_loggerService;
-        private static ILoggerService LoggerService => s_loggerService ??= Locator.Current.GetService<ILoggerService>();
+        private static ILoggerService LoggerService => s_loggerService ??= WolvenKit.AppImpl.Services?.GetService<ILoggerService>();
         private bool _isUpdatingFromCode = false;
 
         public ScnActorIdDropdown()
         {
-            _documentTools = Locator.Current.GetService<DocumentTools>();
+            _documentTools = WolvenKit.AppImpl.Services?.GetService<DocumentTools>();
             InitializeComponent();
             
             this.DataContextChanged += OnDataContextChanged;

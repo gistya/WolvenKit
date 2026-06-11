@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Splat;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Events;
 using WolvenKit.Modkit.Resources;
@@ -27,7 +26,7 @@ namespace WolvenKit.Views.Editors
         public RedCNameEditor()
         {
             InitializeComponent();
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
         }
 
         public bool IsValid { get; set; } = false;

@@ -1,12 +1,10 @@
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Dialogs;
 
 namespace WolvenKit.Views.Dialogs
 {
-    public partial class ProjectWizardView : ReactiveUserControl<ProjectWizardViewModel>
+    public partial class ProjectWizardView : System.Windows.Controls.UserControl
     {
         private bool _syncModName = true;
         private bool _autoUpdate = false;
@@ -15,29 +13,16 @@ namespace WolvenKit.Views.Dialogs
         {
             InitializeComponent();
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         vm => vm.Author,
-                        v => v.AuthorTextBox.Text).DisposeWith(disposables);
-                this.Bind(ViewModel,
                         vm => vm.Email,
-                        v => v.EmailTextBox.Text).DisposeWith(disposables);
-                this.Bind(ViewModel,
                         vm => vm.Version,
-                        v => v.VersionTextBox.Text).DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                     vm => vm.OpenProjectPathCommand,
-                    v => v.ProjectPathButton).DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                     x => x.OkCommand,
-                        x => x.OkButton).DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                     x => x.CancelCommand,
-                        x => x.CancelButton).DisposeWith(disposables);
 
                 if (ViewModel is null)
                 {

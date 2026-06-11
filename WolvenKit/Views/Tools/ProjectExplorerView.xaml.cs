@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +16,6 @@ using DynamicData.Binding;
 using HandyControl.Data;
 using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls;
-using ReactiveUI;
-using Splat;
 using Syncfusion.Data;
 using Syncfusion.UI.Xaml.TreeGrid;
 using WolvenKit.App.Extensions;
@@ -40,7 +37,7 @@ namespace WolvenKit.Views.Tools
     /// <summary>
     /// Interaction logic for ProjectExplorerView.xaml
     /// </summary>
-    public partial class ProjectExplorerView : ReactiveUserControl<ProjectExplorerViewModel>
+    public partial class ProjectExplorerView : System.Windows.Controls.UserControl
     {
         /// <summary>Identifies the <see cref="TreeItemSource"/> dependency property.</summary>
         public static readonly DependencyProperty TreeItemSourceProperty =
@@ -73,7 +70,7 @@ namespace WolvenKit.Views.Tools
         public ProjectExplorerView()
         {
             InitializeComponent();
-            _settingsManager = Locator.Current.GetService<ISettingsManager>()!;
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>()!;
 
             TreeGrid.ItemsSourceChanged += TreeGrid_ItemsSourceChanged;
             TreeGridFlat.ItemsSourceChanged += TreeGridFlat_ItemsSourceChanged;
@@ -96,11 +93,9 @@ namespace WolvenKit.Views.Tools
 
             TreeGrid.NotificationSubscriptionMode = NotificationSubscriptionMode.CollectionChange;
 
-            this.WhenActivated(disposables =>
             {
                 if (DataContext is ProjectExplorerViewModel vm)
                 {
-                    SetCurrentValue(ViewModelProperty, vm);
                 }
 
                 AddKeyUpEvent();
@@ -199,42 +194,30 @@ namespace WolvenKit.Views.Tools
                 Observable
                     .FromEventPattern(TreeGrid, nameof(TreeGrid.CellDoubleTapped))
                     .Subscribe(p => OnCellDoubleTapped(p.Sender, p.EventArgs as TreeGridCellDoubleTappedEventArgs))
-                    .DisposeWith(disposables);
 
                 Observable
                     .FromEventPattern(TreeGridFlat, nameof(TreeGridFlat.CellDoubleTapped))
                     .Subscribe(p => OnCellDoubleTapped(p.Sender, p.EventArgs as TreeGridCellDoubleTappedEventArgs))
-                    .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                         viewModel => viewModel.ToggleFlatModeCommand,
                         view => view.ToggleFlatModeButton)
-                    .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
                     viewModel => viewModel.OpenRootFolderCommand,
                     view => view.OpenFolderButton);
-                this.BindCommand(ViewModel,
                     viewModel => viewModel.RefreshCommand,
                     view => view.RefreshButton);
 
-                this.OneWayBind(ViewModel,
                         viewModel => viewModel.FileTree,
                         view => view.TreeGrid.ItemsSource)
-                    .DisposeWith(disposables);
 
-                this.OneWayBind(ViewModel,
                         viewModel => viewModel.FileList,
                         view => view.TreeGridFlat.ItemsSource)
-                    .DisposeWith(disposables);
 
                 ViewModel.OnToggleFlatMode += OnToggleFlatMode;
                 ViewModel.OnSetLoading += SetLoading;
                 ViewModel.BeginDeferredRefreshContext += BeginDeferredRefreshContext;
 
-                ViewModel.WhenAnyValue(x => x.FileList)
                     .Subscribe(_ => RefreshFlatViewIfNeeded())
-                    .DisposeWith(disposables);
             });
 
             this.ExecuteWhenLoaded(() => IndicateProjectLoading());

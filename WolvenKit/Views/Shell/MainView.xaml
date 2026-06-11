@@ -403,7 +403,9 @@
                 x:Name="dockingAdapter"
                 Grid.Row="1"
                 Margin="5,2,5,0"
-                Background="{StaticResource ContentBackground}" />
+                Background="{StaticResource ContentBackground}"
+                ItemsSource="{Binding DockedViews}"
+                ActiveDocument="{Binding ActiveDocument, Converter={StaticResource ActiveDocumentConverter}, Mode=TwoWay}" />
 
             <shell:StatusBarView
                 Grid.Row="2"

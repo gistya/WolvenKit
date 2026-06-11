@@ -3,7 +3,6 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ReactiveUI;
 using Splat;
 using Splat.Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App;
@@ -56,7 +55,7 @@ namespace WolvenKit
                     services.UseMicrosoftDependencyResolver();
                     var resolver = Locator.CurrentMutable;
                     resolver.InitializeSplat();
-                    resolver.InitializeReactiveUI();
+                    // ReactiveUI view locator removed; using standard DI + DataTemplates for view resolution
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
@@ -106,101 +105,101 @@ namespace WolvenKit
                     services.AddTransient<INodeWrapperFactory, NodeWrapperFactory>();
                     services.AddTransient<IDocumentViewmodelFactory, DocumentViewmodelFactory>();       //IDocumentTabViewmodelFactory, IPaneViewModelFactory, IChunkViewmodelFactory
 
-                    // register views
+                    // register viewmodels (views are resolved via DataTemplates, direct new, or AddTransient for root views)
                     #region shell
 
                     services.AddSingleton<AppViewModel>();
-                    services.AddTransient<IViewFor<AppViewModel>, MainView>();
+                    services.AddTransient<MainView>();
 
                     services.AddTransient<RibbonViewModel>();
-                    services.AddTransient<IViewFor<RibbonViewModel>, RibbonView>();
+                    services.AddTransient<RibbonView>();
 
                     services.AddTransient<MenuBarViewModel>();
-                    services.AddTransient<IViewFor<MenuBarViewModel>, MenuBarView>();
+                    services.AddTransient<MenuBarView>();
 
                     services.AddTransient<StatusBarViewModel>();
-                    services.AddTransient<IViewFor<StatusBarViewModel>, StatusBarView>();
+                    services.AddTransient<StatusBarView>();
 
                     #endregion
 
                     #region dialogs
 
                     services.AddTransient<InputDialogViewModel>();
-                    services.AddTransient<IViewFor<InputDialogViewModel>, InputDialogView>();
+                    services.AddTransient<InputDialogView>();
 
                     services.AddTransient<SearchAndReplaceDialogViewModel>();
-                    services.AddTransient<IViewFor<SearchAndReplaceDialogViewModel>, SearchAndReplaceDialog>();
+                    services.AddTransient<SearchAndReplaceDialog>();
 
                     services.AddTransient<CreateMaterialsDialogViewModel>();
-                    services.AddTransient<IViewFor<CreateMaterialsDialogViewModel>, CreateMaterialsDialog>();
+                    services.AddTransient<CreateMaterialsDialog>();
 
                     services.AddTransient<RenameDialogViewModel>();
-                    services.AddTransient<IViewFor<RenameDialogViewModel>, RenameDialog>();
+                    services.AddTransient<RenameDialog>();
 
                     services.AddTransient<SaveGameSelectionDialogModel>();
-                    services.AddTransient<IViewFor<SaveGameSelectionDialogModel>, SaveGameSelectionDialog>();
+                    services.AddTransient<SaveGameSelectionDialog>();
 
                     services.AddTransient<LaunchProfilesViewModel>();
-                    services.AddTransient<IViewFor<LaunchProfilesViewModel>, LaunchProfilesView>();
+                    services.AddTransient<LaunchProfilesView>();
 
                     services.AddTransient<MaterialsRepositoryViewModel>();
-                    services.AddTransient<IViewFor<MaterialsRepositoryViewModel>, MaterialsRepositoryView>();
+                    services.AddTransient<MaterialsRepositoryView>();
 
                     services.AddTransient<NewFileViewModel>();
-                    services.AddTransient<IViewFor<NewFileViewModel>, NewFileView>();
+                    services.AddTransient<NewFileView>();
 
                     services.AddTransient<SoundModdingViewModel>();
-                    services.AddTransient<IViewFor<SoundModdingViewModel>, SoundModdingView>();
+                    services.AddTransient<SoundModdingView>();
 
                     services.AddTransient<FirstSetupViewModel>();
-                    services.AddTransient<IViewFor<FirstSetupViewModel>, FirstSetupView>();
+                    services.AddTransient<FirstSetupView>();
 
                     services.AddTransient<ProjectWizardViewModel>();
-                    services.AddTransient<IViewFor<ProjectWizardViewModel>, ProjectWizardView>();
+                    services.AddTransient<ProjectWizardView>();
 
                     services.AddTransient<ChooseCollectionViewModel>();
-                    services.AddTransient<IViewFor<ChooseCollectionViewModel>, ChooseCollectionView>();
+                    services.AddTransient<ChooseCollectionView>();
 
 
                     // Importers
 
                     services.AddTransient<ImportViewModel>();
-                    services.AddTransient<IViewFor<ImportViewModel>, ImportView>();
+                    services.AddTransient<ImportView>();
 
                     services.AddTransient<ExportViewModel>();
-                    services.AddTransient<IViewFor<ExportViewModel>, ExportView>();
+                    services.AddTransient<ExportView>();
 
                     #endregion
 
-                    #region documents
+                    #region documents / tools (for direct resolve + DataTemplates still create via parameterless ctor)
 
                     services.AddTransient<AssetBrowserViewModel>();
-                    services.AddTransient<IViewFor<AssetBrowserViewModel>, AssetBrowserView>();
+                    services.AddTransient<AssetBrowserView>();
 
                     services.AddTransient<LogViewModel>();
-                    services.AddTransient<IViewFor<LogViewModel>, LogView>();
+                    services.AddTransient<LogView>();
 
                     services.AddSingleton<ProjectExplorerViewModel>();
-                    services.AddTransient<IViewFor<ProjectExplorerViewModel>, ProjectExplorerView>();
+                    services.AddTransient<ProjectExplorerView>();
 
                     services.AddSingleton<PropertiesViewModel>();
-                    services.AddTransient<IViewFor<PropertiesViewModel>, PropertiesView>();
+                    services.AddTransient<PropertiesView>();
 
                     services.AddTransient<TweakBrowserViewModel>();
-                    services.AddTransient<IViewFor<TweakBrowserViewModel>, TweakBrowserView>();
+                    services.AddTransient<TweakBrowserView>();
 
                     services.AddTransient<LocKeyBrowserViewModel>();
-                    services.AddTransient<IViewFor<LocKeyBrowserViewModel>, LocKeyBrowserView>();
+                    services.AddTransient<LocKeyBrowserView>();
 
                     #endregion
 
                     #region tools
 
                     services.AddTransient<AudioPlayerViewModel>();
-                    services.AddTransient<IViewFor<AudioPlayerViewModel>, AudioPlayerView>();
+                    services.AddTransient<AudioPlayerView>();
 
                     services.AddTransient<HashToolViewModel>();
-                    services.AddTransient<IViewFor<HashToolViewModel>, HashToolView>();
+                    services.AddTransient<HashToolView>();
 
                     services.AddSingleton<DocumentTools>();
                     services.AddSingleton<TemplateFileTools>();
@@ -211,19 +210,19 @@ namespace WolvenKit
                     #region homepage
 
                     services.AddTransient<HomePageViewModel>();
-                    services.AddTransient<IViewFor<HomePageViewModel>, HomePageView>();
+                    services.AddTransient<HomePageView>();
 
                     services.AddTransient<SettingsPageViewModel>();
-                    services.AddTransient<IViewFor<SettingsPageViewModel>, SettingsPageView>();
+                    services.AddTransient<SettingsPageView>();
 
                     services.AddTransient<WelcomePageViewModel>();
-                    services.AddTransient<IViewFor<WelcomePageViewModel>, WelcomePageView>();
+                    services.AddTransient<WelcomePageView>();
 
                     services.AddTransient<ModsViewModel>();
-                    services.AddTransient<IViewFor<ModsViewModel>, ModsView>();
+                    services.AddTransient<ModsView>();
 
                     services.AddTransient<PluginsToolViewModel>();
-                    services.AddTransient<IViewFor<PluginsToolViewModel>, PluginsToolView>();
+                    services.AddTransient<PluginsToolView>();
 
                     #endregion
 

@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Splat;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Events;
 using WolvenKit.Modkit.Resources;

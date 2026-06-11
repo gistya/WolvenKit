@@ -1,6 +1,6 @@
-<reactiveUi:ReactiveUserControl
+<UserControl
     x:Class="WolvenKit.Views.Documents.RDTDataView"
-    x:TypeArguments="documents:RDTDataViewModel"
+   
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,7 +10,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:WolvenKit.App.Models;assembly=WolvenKit.App"
     xmlns:nodify="https://miroiu.github.io/nodify"
-    xmlns:reactiveUi="http://reactiveui.net"
+   
     xmlns:shell="clr-namespace:WolvenKit.App.ViewModels.Shell;assembly=WolvenKit.App"
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     xmlns:templates="clr-namespace:WolvenKit.Views.Templates"
@@ -416,4 +416,4 @@
             </editors:AutomaticNodifyEditor.ItemContainerStyle>
         </editors:AutomaticNodifyEditor>
     </Grid>
-</reactiveUi:ReactiveUserControl>
+</UserControl>

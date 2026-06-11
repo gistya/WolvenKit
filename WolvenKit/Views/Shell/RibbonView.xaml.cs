@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
-using Splat;
+using Microsoft.Extensions.DependencyInjection;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.Core.Interfaces;
@@ -12,7 +10,7 @@ using WolvenKit.Views.Templates;
 
 namespace WolvenKit.Views.Shell
 {
-    public partial class RibbonView : ReactiveUserControl<RibbonViewModel>
+    public partial class RibbonView : System.Windows.Controls.UserControl
     {
         private readonly ISettingsManager _settingsManager;
         private readonly ILoggerService _loggerService;
@@ -21,93 +19,35 @@ namespace WolvenKit.Views.Shell
 
         public RibbonView()
         {
-            ViewModel = Locator.Current.GetService<RibbonViewModel>();
+            ViewModel = WolvenKit.AppImpl.Services?.GetService<RibbonViewModel>();
             DataContext = ViewModel;
             InitializeComponent();
 
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
-            _loggerService = Locator.Current.GetService<ILoggerService>();
+            _settingsManager = WolvenKit.AppImpl.Services?.GetService<ISettingsManager>();
+            _loggerService = WolvenKit.AppImpl.Services?.GetService<ILoggerService>();
 
-            this.WhenActivated(disposables =>
-            {
-                // toolbar
-                // File
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.NewFileCommand,
-                        view => view.ToolbarNewButton)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.SaveFileCommand,
-                        view => view.ToolbarSaveButton)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.SaveAsCommand,
-                        view => view.ToolbarSaveAsButton)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.SaveAllCommand,
-                        view => view.ToolbarSaveAllButton)
-                    .DisposeWith(disposables);
+            // Reactive Bind* removed. Commands are now bound in XAML (or wired below for complex cases).
+            // For LaunchMenu.IsEnabled and LaunchProfileText we use a mix of XAML + code for minimal diff.
 
-                // project
-
-                // pack
-                // pack redmod
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.PackRedModCommand,
-                        view => view.ToolbarPackProjectButton)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.PackInstallRedModCommand,
-                        view => view.ToolbarPackInstallRedmodButton)
-                    .DisposeWith(disposables);
-
-                // pack legacy mod
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.PackModCommand,
-                        view => view.ToolbarPackProjectLegacyButton)
-                    .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.PackInstallModCommand,
-                        view => view.ToolbarPackInstallLegacyButton)
-                    .DisposeWith(disposables);
-
-                // HotReload
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.HotInstallModCommand,
-                        view => view.ToolbarHotInstallButton)
-                    .DisposeWith(disposables);
-
-                // Launch profiles
-                this.BindCommand(ViewModel,
-                        viewModel => viewModel.MainViewModel.LaunchOptionsCommand,
-                        view => view.LaunchOptionsMenuItem)
-                    .DisposeWith(disposables);
-
-                this.BindCommand(ViewModel,
-                       viewModel => viewModel.LaunchProfileCommand,
-                       view => view.LaunchProfileButton)
-                   .DisposeWith(disposables);
-
-                this.Bind(ViewModel, vm => vm.LaunchProfileText,
-                   view => view.LaunchProfileText.Text)
-                   .DisposeWith(disposables);
-
-                // Active project: Disable/Enable buttons
-                this.OneWayBind(ViewModel, vm => vm.MainViewModel.ActiveProject,
-                    view => view.LaunchMenu.IsEnabled,
-                    p => p is not null)
-                    .DisposeWith(disposables);
-
-            });
-
-            if (ViewModel is not null && !string.IsNullOrEmpty(_settingsManager.LastLaunchProfile))
+            if (ViewModel is not null && !string.IsNullOrEmpty(_settingsManager?.LastLaunchProfile))
             {
                 ViewModel.LaunchProfileText = _settingsManager.LastLaunchProfile;
             }
 
-            _settingsManager.WhenAnyValue(x => x.LaunchProfiles).Subscribe(_ => GetLaunchProfiles());
+            if (_settingsManager != null)
+            {
+                // Note: WhenAnyValue removed; if launch profiles change we could subscribe to PropertyChanged on settings
+                // For now call once; the menu population also happens on click paths.
+                _settingsManager.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(ISettingsManager.LaunchProfiles))
+                    {
+                        GetLaunchProfiles();
+                    }
+                };
+            }
 
+            GetLaunchProfiles();
         }
 
 

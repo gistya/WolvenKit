@@ -14,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ReactiveUI;
 using WolvenKit.App.ViewModels.Tools;
 using WolvenKit.Common.FNV1A;
 using WolvenKit.Core.CRC;
@@ -27,7 +26,7 @@ namespace WolvenKit.Views.Tools;
 /// <summary>
 /// Interaktionslogik für HasherView.xaml
 /// </summary>
-public partial class HashToolView : ReactiveUserControl<HashToolViewModel>
+public partial class HashToolView : System.Windows.Controls.UserControl
 {
     public HashToolView()
     {

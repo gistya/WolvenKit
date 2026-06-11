@@ -1,19 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ReactiveUI;
 using WolvenKit.App.Models.ProjectManagement.Project;
 using WolvenKit.App.ViewModels.Dialogs;
 using Window = System.Windows.Window;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
-    public partial class AddItemsToStoreDialog : IViewFor<AddItemsToStoreDialogViewModel>
+    public partial class AddItemsToStoreDialog
     {
         private static string s_lastYamlFile = string.Empty;
         private static string s_lastRedsFile = string.Empty;
@@ -31,42 +29,28 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            this.WhenActivated(disposables =>
             {
-                this.Bind(ViewModel,
                         x => x.YamlFiles,
                         x => x.YamlDropdownMenu.Options)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.YamlPath,
                         x => x.YamlDropdownMenu.SelectedOption)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.RedsFiles,
                         x => x.RedsDropdownMenu.Options)
-                    .DisposeWith(disposables);
-                this.Bind(ViewModel,
                         x => x.RedsPath,
                         x => x.RedsDropdownMenu.SelectedOption)
-                    .DisposeWith(disposables);
 
-                this.Bind(ViewModel,
                         x => x.RememberValues,
                         x => x.RememberValuesCheckbox.IsChecked)
-                    .DisposeWith(disposables);
 
                 #region validation
 
-                this.WhenAnyValue(x => x.ItemCodesTextBox.Text)
                     .Select(_ => ViewModel?.CanSave())
                     .BindTo(this, x => x.ViewModel.IsFinishEnabled);
 
-                this.WhenAnyValue(x => x.RedsDropdownMenu.SelectedOption)
                     .Select(_ => ViewModel?.CanSave())
                     .BindTo(this, x => x.ViewModel.IsFinishEnabled);
 
-                this.WhenAnyValue(x => x.YamlDropdownMenu.SelectedOption)
                     .Select(_ => ViewModel?.CanSave())
                     .BindTo(this, x => x.ViewModel.IsFinishEnabled);
 
@@ -80,7 +64,6 @@ namespace WolvenKit.Views.Dialogs.Windows
         }
 
         public AddItemsToStoreDialogViewModel ViewModel { get; set; }
-        object IViewFor.ViewModel { get => ViewModel; set => ViewModel = (AddItemsToStoreDialogViewModel)value; }
 
         public bool? ShowDialog(Window owner)
         {
