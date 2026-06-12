@@ -12,6 +12,7 @@ using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 using WolvenKit.Core.Interfaces;
 using WolvenKit.App.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Converters
 {
@@ -21,7 +22,7 @@ namespace WolvenKit.Converters
     public class RedTypeToChunkViewModelCollectionConverter : IValueConverter
     {
         private static ILoggerService? s_loggerService;
-        private static ILoggerService? LoggerService => s_loggerService ??= Locator.Current.GetService<ILoggerService>();
+        private static ILoggerService? LoggerService => s_loggerService ??= AppImpl.Services?.GetService<ILoggerService>();
 
         /// <summary>
         /// Global cache shared across all converter instances
@@ -62,8 +63,8 @@ namespace WolvenKit.Converters
         {
             try
             {
-                var factory = Locator.Current.GetService<IChunkViewmodelFactory>();
-                var appViewModel = Locator.Current.GetService<AppViewModel>();
+                var factory = AppImpl.Services?.GetService<IChunkViewmodelFactory>();
+                var appViewModel = AppImpl.Services?.GetService<AppViewModel>();
 
                 if (factory == null)
                 {

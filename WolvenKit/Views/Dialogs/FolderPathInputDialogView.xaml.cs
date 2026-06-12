@@ -18,10 +18,6 @@ namespace WolvenKit.Views.Dialogs
             ViewModel = new FolderPathInputDialogViewModel(activeProject, dialogTitle);
             DataContext = ViewModel;
 
-            {
-                        x => x.Text,
-                        x => x.TextBox.Text)
-            });
         }
 
         public string DialogTitle;

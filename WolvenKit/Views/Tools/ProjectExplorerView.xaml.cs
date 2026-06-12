@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,6 +30,7 @@ using WolvenKit.Views.Dialogs;
 using WolvenKit.Views.Dialogs.Windows;
 using WolvenKit.Views.Templates;
 using RowColumnIndex = Syncfusion.UI.Xaml.ScrollAxis.RowColumnIndex;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Tools
 {
@@ -39,6 +39,12 @@ namespace WolvenKit.Views.Tools
     /// </summary>
     public partial class ProjectExplorerView : System.Windows.Controls.UserControl
     {
+        public ProjectExplorerViewModel ViewModel
+        {
+            get => DataContext as ProjectExplorerViewModel;
+            set => DataContext = value;
+        }
+
         /// <summary>Identifies the <see cref="TreeItemSource"/> dependency property.</summary>
         public static readonly DependencyProperty TreeItemSourceProperty =
             DependencyProperty.Register(nameof(TreeItemSource), typeof(ObservableCollection<FileSystemModel>),
@@ -94,10 +100,6 @@ namespace WolvenKit.Views.Tools
             TreeGrid.NotificationSubscriptionMode = NotificationSubscriptionMode.CollectionChange;
 
             {
-                if (DataContext is ProjectExplorerViewModel vm)
-                {
-                }
-
                 AddKeyUpEvent();
 
                 Interactions.DeleteFiles = _ =>
@@ -191,34 +193,19 @@ namespace WolvenKit.Views.Tools
                 };
 
                 //EventBindings
-                Observable
-                    .FromEventPattern(TreeGrid, nameof(TreeGrid.CellDoubleTapped))
-                    .Subscribe(p => OnCellDoubleTapped(p.Sender, p.EventArgs as TreeGridCellDoubleTappedEventArgs))
+                TreeGrid.CellDoubleTapped += (s, e) => OnCellDoubleTapped(s, e);
+                TreeGridFlat.CellDoubleTapped += (s, e) => OnCellDoubleTapped(s, e);
 
-                Observable
-                    .FromEventPattern(TreeGridFlat, nameof(TreeGridFlat.CellDoubleTapped))
-                    .Subscribe(p => OnCellDoubleTapped(p.Sender, p.EventArgs as TreeGridCellDoubleTappedEventArgs))
-
-                        viewModel => viewModel.ToggleFlatModeCommand,
-                        view => view.ToggleFlatModeButton)
-
-                    viewModel => viewModel.OpenRootFolderCommand,
-                    view => view.OpenFolderButton);
-                    viewModel => viewModel.RefreshCommand,
-                    view => view.RefreshButton);
-
-                        viewModel => viewModel.FileTree,
-                        view => view.TreeGrid.ItemsSource)
-
-                        viewModel => viewModel.FileList,
-                        view => view.TreeGridFlat.ItemsSource)
+                if (ToggleFlatModeButton != null) ToggleFlatModeButton.Command = ViewModel.ToggleFlatModeCommand;
+                if (OpenFolderButton != null) OpenFolderButton.Command = ViewModel.OpenRootFolderCommand;
+                if (RefreshButton != null) RefreshButton.Command = ViewModel.RefreshCommand;
 
                 ViewModel.OnToggleFlatMode += OnToggleFlatMode;
                 ViewModel.OnSetLoading += SetLoading;
                 ViewModel.BeginDeferredRefreshContext += BeginDeferredRefreshContext;
 
-                    .Subscribe(_ => RefreshFlatViewIfNeeded())
-            });
+                ViewModel.PropertyChanged += (_, _) => RefreshFlatViewIfNeeded();
+            }
 
             this.ExecuteWhenLoaded(() => IndicateProjectLoading());
         }
@@ -389,13 +376,8 @@ namespace WolvenKit.Views.Tools
 
         private async Task BeginDeferredRefreshContext(CancellationToken deferRefreshToken, Task doBeforeRefresh)
         {
-            CompositeDisposable disposables =
-            [
-                TreeGridFlat.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh),
-                TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh)
-            ];
-
-            using (disposables)
+            using var deferFlat = TreeGridFlat.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh);
+            using var deferTree = TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh);
             {
                 await doBeforeRefresh;
 

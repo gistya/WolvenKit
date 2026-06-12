@@ -16,10 +16,7 @@ namespace WolvenKit.Views.Tools
         public TweakBrowserView()
         {
             InitializeComponent();
-
-            {
-                Context.LoadTweakDB();
-            });
+            Loaded += (_, _) => Context.LoadTweakDB();
         }
 
         private void TextBox_KeyEnterUpdate(object sender, KeyEventArgs e)

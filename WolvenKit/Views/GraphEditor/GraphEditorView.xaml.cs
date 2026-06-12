@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -106,14 +105,20 @@ public partial class GraphEditorView : UserControl
 
         _appViewModel = WolvenKit.AppImpl.Services?.GetService<AppViewModel>();
 
-        Observable.FromEventPattern<RoutedEventHandler, RoutedEventArgs>(
-            handler => Editor.ViewportUpdated += handler,
-            handler => Editor.ViewportUpdated -= handler)
-            .Throttle(TimeSpan.FromSeconds(1))
-            .Subscribe(x =>
-            {
-                ViewportUpdated();
-            });
+        var viewportTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        viewportTimer.Tick += (_, _) =>
+        {
+            viewportTimer.Stop();
+            ViewportUpdated();
+        };
+        Editor.ViewportUpdated += (_, _) =>
+        {
+            viewportTimer.Stop();
+            viewportTimer.Start();
+        };
     }
 
     private void ViewportUpdated()
@@ -781,7 +786,6 @@ public partial class GraphEditorView : UserControl
             e.Handled = true;
         }
     }
-
 
 
     /// <summary>

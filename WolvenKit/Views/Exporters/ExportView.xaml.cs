@@ -70,18 +70,7 @@ public partial class ExportView : System.Windows.Controls.UserControl
             _shownProperties.Clear();
             _previousSelectedObject = OverlayPropertyGrid.SelectedObject;
         }
-
-        if (e.DisplayName is
-            nameof(ReactiveObject.Changed) or
-            nameof(ReactiveObject.Changing) or
-            nameof(ReactiveObject.ThrownExceptions)
-           )
-        {
-            e.Cancel = true;
-            return;
-        }
-        
-        // Generate special editors for certain properties
+// Generate special editors for certain properties
         // we need the callback function
         // we need the propertyname
         // we need the type of the arguments

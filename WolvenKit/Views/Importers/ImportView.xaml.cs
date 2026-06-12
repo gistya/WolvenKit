@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,11 +18,18 @@ using WolvenKit.Helpers;
 using WolvenKit.RED4.CR2W;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.Exporters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Importers;
 
 public partial class ImportView : System.Windows.Controls.UserControl
 {
+        public ImportViewModel ViewModel
+        {
+            get => DataContext as ImportViewModel;
+            set => DataContext = value;
+        }
+
     private readonly Dictionary<string, PropertyInfo> _shownProperties = new();
 
     public ImportView()
@@ -33,22 +39,10 @@ public partial class ImportView : System.Windows.Controls.UserControl
         ImportGrid.FilterRowCellRenderers.Add("TextBoxExt", new GridFilterRowTextBoxRendererExt());
         ImportGrid.FilterChanged += Datagrid_FilterChanged;
 
+        if (ViewModel != null)
         {
-            if (DataContext is ImportViewModel viewModel)
-            {
-            }
-
             ViewModel.OnRefresh += RefreshFilter;
-
-                    x => x.SelectedObject.Properties,
-                    x => x.OverlayPropertyGrid.SelectedObject)
-
-                    x => x.Items,
-                    x => x.ImportGrid.ItemsSource)
-
-                   x => x.SelectedObject,
-                   x => x.ImportGrid.SelectedItem)
-        });
+        }
     }
 
     private void RefreshFilter(object sender, EventArgs e) => Datagrid_FilterChanged(ImportGrid, null);
@@ -164,18 +158,7 @@ public partial class ImportView : System.Windows.Controls.UserControl
             _previousSelectedObject = OverlayPropertyGrid.SelectedObject;
         }
 
-        switch (e.DisplayName)
-        {
-            case nameof(ReactiveObject.Changed):
-            case nameof(ReactiveObject.Changing):
-            case nameof(ReactiveObject.ThrownExceptions):
-                e.Cancel = true;
-                return;
-            default:
-                break;
-        }
-
-        if (ViewModel?.SelectedObject?.Properties is XbmImportArgs { })
+if (ViewModel?.SelectedObject?.Properties is XbmImportArgs { })
         {
             if (e.DisplayName == "Use existing file")
             {

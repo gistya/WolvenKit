@@ -3,13 +3,13 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using DynamicData;
+using DynamicData.Binding;
 using HandyControl.Tools.Extension;
 using MahApps.Metro.Controls;
 using Serilog.Events;
@@ -19,6 +19,7 @@ using WolvenKit.App.ViewModels.Tools;
 using WolvenKit.Common;
 using WolvenKit.Core.Exceptions;
 using WolvenKit.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Tools
 {
@@ -29,6 +30,12 @@ namespace WolvenKit.Views.Tools
     /// </summary>
     public partial class LogView : System.Windows.Controls.UserControl
     {
+        public LogViewModel ViewModel
+        {
+            get => DataContext as LogViewModel;
+            set => DataContext = value;
+        }
+
         private ScrollViewer _scrollViewer;
         private bool _autoscroll = true;
 
@@ -45,11 +52,15 @@ namespace WolvenKit.Views.Tools
             LogEntries.CollectionChanged += LogEntries_CollectionChanged;
 
             var sink = WolvenKit.AppImpl.Services?.GetService<MySink>();
-            _ = sink.Connect()
-                .DisposeMany()
-                .Subscribe(OnNext);
+            if (sink != null)
+            {
+                _ = sink.Connect()
+                    
+                    .Bind(out var _)
+                    .DisposeMany()
+                    .Subscribe(OnNext);
+            }
 
-            // (migrated direct execution of previous reactive bits)
             LogEntries_CollectionChanged(null, null);
         }
 

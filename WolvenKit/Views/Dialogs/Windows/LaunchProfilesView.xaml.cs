@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,6 +15,7 @@ using WolvenKit.App.Models;
 using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Core;
 using Window = System.Windows.Window;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -29,7 +29,6 @@ namespace WolvenKit.Views.Dialogs.Windows
             DataContext = ViewModel;
 
             {
-
                 if (ViewModel is not null)
                 {
                     ViewModel.IsUpdating += OnInternalUpdate;
@@ -37,8 +36,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
 
                 ProfilesListView.RowDragDropController.Dropped += OnRowDropped;
-            });
-
+            }
         }
 
         private void OnInternalUpdate(object sender, bool isUpdating)
@@ -65,16 +63,6 @@ namespace WolvenKit.Views.Dialogs.Windows
 
         private void ProfilePropertyGrid_AutoGeneratingPropertyGridItem(object sender, Syncfusion.Windows.PropertyGrid.AutoGeneratingPropertyGridItemEventArgs e)
         {
-            switch (e.DisplayName)
-            {
-                case nameof(ReactiveObject.Changed):
-                case nameof(ReactiveObject.Changing):
-                case nameof(ReactiveObject.ThrownExceptions):
-                    e.Cancel = true;
-                    break;
-                default:
-                    break;
-            }
         }
 
         //https://help.syncfusion.com/wpf/datagrid/drag-and-drop#reorder-the-source-collection-while-drag-and-drop-the-rows

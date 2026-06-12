@@ -12,6 +12,7 @@ using HandyControl.Tools.Extension;
 using WolvenKit.App.Services;
 using WolvenKit.Modkit.Resources;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 public enum FileScope
 {

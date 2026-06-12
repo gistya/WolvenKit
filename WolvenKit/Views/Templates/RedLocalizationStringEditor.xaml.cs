@@ -11,6 +11,7 @@ using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.Interfaces.Extensions;
 using WolvenKit.RED4.Archive.CR2W;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Editors;
 /// <summary>

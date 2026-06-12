@@ -21,15 +21,12 @@ namespace WolvenKit.Views.Editors
             InitializeComponent();
             _useDefaultOption = true;
 
+            Loaded += (_, _) =>
             {
                 if (DataContext is not ChunkViewModel vm)
                 {
                     return;
                 }
-
-                        v => (CString)v.Data,
-                        x => x.RedStringEditor.RedString)
-
                 InitializePropertyValues(vm);
 
                 if (!ShowRefreshButton)
@@ -52,59 +49,6 @@ namespace WolvenKit.Views.Editors
                 {
                     return;
                 }
-
-                // Show/hide dropdown based on filter and results
-                    .Subscribe(tuple =>
-                    {
-                        var (filter, filteredOptions) = tuple;
-
-                        if (IsJournalEntryField(vm))
-                        {
-                            // For journal entries, always show and enable the dropdown
-                            Dropdown.SetCurrentValue(VisibilityProperty, Visibility.Visible);
-                            Dropdown.SetCurrentValue(IsEnabledProperty, true);
-
-                            s_LastSearchTerm = filter;
-                            if (string.IsNullOrWhiteSpace(filter))
-                            {
-                                Dropdown.SetCurrentValue(ComboBox.TextProperty, "Type to search journal entries...");
-                            }
-                            else if (filteredOptions != null && filteredOptions.Count > 0)
-                            {
-                                // Clear the text to show the dropdown items
-                                Dropdown.SetCurrentValue(ComboBox.TextProperty, "");
-                            }
-                            else
-                            {
-                                Dropdown.SetCurrentValue(ComboBox.TextProperty, "No matching entries found");
-                            }
-                        }
-                        else
-                        {
-                            // For non-journal entries, use the original logic
-                            if (string.IsNullOrWhiteSpace(filter))
-                            {
-                                // No filter provided - show dropdown but disable it with helpful message
-                                Dropdown.SetCurrentValue(VisibilityProperty, Visibility.Visible);
-                                Dropdown.SetCurrentValue(IsEnabledProperty, false);
-                                Dropdown.SetCurrentValue(ComboBox.TextProperty, "Type to search...");
-                            }
-                            else if (filteredOptions != null && filteredOptions.Count > 0)
-                            {
-                                // Filter provided and results found - show and enable dropdown
-                                Dropdown.SetCurrentValue(VisibilityProperty, Visibility.Visible);
-                                Dropdown.SetCurrentValue(IsEnabledProperty, true);
-                            }
-                            else
-                            {
-                                // Filter provided but no results - show dropdown and enable it so user can see the message
-                                Dropdown.SetCurrentValue(VisibilityProperty, Visibility.Visible);
-                                Dropdown.SetCurrentValue(IsEnabledProperty, true);
-                                Dropdown.SetCurrentValue(ComboBox.TextProperty, "No matching entries found");
-                            }
-                        }
-                    })
-
                 if (!ShowRefreshButton)
                 {
                     ColumnRefreshButton.SetCurrentValue(ColumnDefinition.WidthProperty, new GridLength(0));
@@ -127,7 +71,7 @@ namespace WolvenKit.Views.Editors
                 }
 
                 SetDropdownValueFromDataContext();
-            });
+            };
         }
 
         private void RedStringEditor_ValueChanged(object sender, RoutedEventArgs e)
@@ -136,7 +80,7 @@ namespace WolvenKit.Views.Editors
                 ((var.ToString() ?? "") != SelectedOption))
             {
                 SetDropdownValueFromDataContext();
-            }
+            };
         }
 
         private static bool IsJournalEntryField(ChunkViewModel vm) =>

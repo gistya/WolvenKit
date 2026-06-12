@@ -7,6 +7,7 @@ using WolvenKit.App.ViewModels.Dialogs;
 using WolvenKit.Interfaces.Extensions;
 using WolvenKit.RED4.Types;
 using Window = System.Windows.Window;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -49,12 +50,6 @@ namespace WolvenKit.Views.Dialogs.Windows
             Owner = Application.Current.MainWindow;
 
             {
-                        x => x.Text,
-                        x => x.TextBox.Text)
-
-                        x => x.EnableRefactoring,
-                        x => x.EnableRefactoringCheckbox.IsChecked)
-
                 if (ViewModel is null)
                 {
                     return;
@@ -83,8 +78,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
                 TextBox.Select(fileNameStart, fileNameEnd - fileNameStart);
                 TextBox.Focus();
-
-            });
+            }
         }
 
         public RenameDialogViewModel ViewModel { get; set; }

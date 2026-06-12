@@ -67,7 +67,6 @@ namespace WolvenKit.Views.Editors
         }
 
 
-
         private ScrollViewer _scrollViewer;
 
         public TrimmingTextBox() => InitializeComponent();

@@ -27,41 +27,8 @@ public partial class AddInkatlasDialog
 
         LoadLastSelection();
 
-        {
-            // bind to filteredDropdownMenu
-                    x => x.ExistingFiles,
-                    x => x.ExistingFileDropdownMenu.Options)
-                    x => x.ExistingFile,
-                    x => x.ExistingFileDropdownMenu.SelectedOption)
-                    x => x.ProjectFolders,
-                    x => x.FilterableDropdownMenu.Options)
-                    x => x.RelativePath,
-                    x => x.FilterableDropdownMenu.SelectedOption)
-
-            // bind rest of properties
-                    x => x.RelativePath,
-                    x => x.RelativePathBox.Text)
-                    x => x.InkatlasFileName,
-                    x => x.InkatlasFileNameBox.Text)
-                    x => x.PngSourceDir,
-                    x => x.PngFolderBox.Text)
-                    x => x.ExistingFile,
-                    x => x.ExistingFileBox.Text)
-                    x => x.TileWidth,
-                    x => x.TileWidthBox.Text)
-                    x => x.TileHeight,
-                    x => x.TileHeightBox.Text)
-                    x => x.RememberValues,
-                    x => x.RememberValuesCheckBox.IsChecked)
-        });
     }
-
     public AddInkatlasDialogViewModel ViewModel { get; set; }
-
-    {
-        get => ViewModel;
-        set => ViewModel = (AddInkatlasDialogViewModel)value;
-    }
 
     public bool? ShowDialog(Window owner)
     {

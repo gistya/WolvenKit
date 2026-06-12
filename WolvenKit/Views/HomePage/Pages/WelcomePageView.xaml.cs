@@ -9,6 +9,12 @@ namespace WolvenKit.Views.HomePage.Pages
 {
     public partial class WelcomePageView : System.Windows.Controls.UserControl
     {
+        public WelcomePageViewModel ViewModel
+        {
+            get => DataContext as WelcomePageViewModel;
+            set => DataContext = value;
+        }
+
         public WelcomePageView()
         {
             InitializeComponent();

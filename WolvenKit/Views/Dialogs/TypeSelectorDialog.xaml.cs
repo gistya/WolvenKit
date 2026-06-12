@@ -26,13 +26,6 @@ public partial class TypeSelectorDialog : System.Windows.Controls.UserControl
         InitializeComponent();
 
         TypeDataGrid.FilterRowCellRenderers.Add("TextBoxExt", new GridFilterRowTextBoxRendererExt());
-
-        {
-            TypeDataGrid.ClearFilters();
-
-
-
-
-        });
+        TypeDataGrid.ClearFilters();
     }
 }

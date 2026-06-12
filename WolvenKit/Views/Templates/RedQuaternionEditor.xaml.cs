@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
 using WolvenKit.App.ViewModels.Shell;
@@ -19,42 +18,29 @@ namespace WolvenKit.Views.Editors
         {
             InitializeComponent();
 
-            Observable.FromEventPattern<TextChangedEventHandler, TextChangedEventArgs>(
-                handler => ITextBox.TextChanged += handler,
-                handler => ITextBox.TextChanged -= handler)
-                .Throttle(TimeSpan.FromSeconds(.5))
-                .Subscribe(x =>
-                {
-                    SetIValue(ITextBox.Text);
-                });
+            AttachThrottledTextChanged(ITextBox, SetIValue);
+            AttachThrottledTextChanged(JTextBox, SetJValue);
+            AttachThrottledTextChanged(KTextBox, SetKValue);
+            AttachThrottledTextChanged(RTextBox, SetRValue);
 
-            Observable.FromEventPattern<TextChangedEventHandler, TextChangedEventArgs>(
-                handler => JTextBox.TextChanged += handler,
-                handler => JTextBox.TextChanged -= handler)
-                .Throttle(TimeSpan.FromSeconds(.5))
-                .Subscribe(x =>
-                {
-                    SetJValue(JTextBox.Text);
-                });
+        }
 
-            Observable.FromEventPattern<TextChangedEventHandler, TextChangedEventArgs>(
-                handler => KTextBox.TextChanged += handler,
-                handler => KTextBox.TextChanged -= handler)
-                .Throttle(TimeSpan.FromSeconds(.5))
-                .Subscribe(x =>
-                {
-                    SetKValue(KTextBox.Text);
-                });
-
-            Observable.FromEventPattern<TextChangedEventHandler, TextChangedEventArgs>(
-                handler => RTextBox.TextChanged += handler,
-                handler => RTextBox.TextChanged -= handler)
-                .Throttle(TimeSpan.FromSeconds(.5))
-                .Subscribe(x =>
-                {
-                    SetRValue(RTextBox.Text);
-                });
-
+        private void AttachThrottledTextChanged(TextBox textBox, Action<string> setter)
+        {
+            var throttleTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(.5)
+            };
+            throttleTimer.Tick += (_, _) =>
+            {
+                throttleTimer.Stop();
+                setter(textBox.Text);
+            };
+            textBox.TextChanged += (_, _) =>
+            {
+                throttleTimer.Stop();
+                throttleTimer.Start();
+            };
         }
 
         //public Quaternion RedQuaternion

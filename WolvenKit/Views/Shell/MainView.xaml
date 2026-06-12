@@ -118,37 +118,37 @@
 
                 <Grid.Resources>
                     <DataTemplate DataType="{x:Type dialogVMs:NewFileViewModel}">
-                        <dialogs:NewFileView ViewModel="{Binding}" />
+                        <dialogs:NewFileView DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:SoundModdingViewModel}">
-                        <dialogs:SoundModdingView ViewModel="{Binding}" />
+                        <dialogs:SoundModdingView DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:TypeSelectorDialogViewModel}">
-                        <dialogs:TypeSelectorDialog ViewModel="{Binding}" />
+                        <dialogs:TypeSelectorDialog DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:ProjectWizardViewModel}">
-                        <dialogs:ProjectWizardView ViewModel="{Binding}" />
+                        <dialogs:ProjectWizardView DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type hpvm:HomePageViewModel}">
-                        <hpv:HomePageView ViewModel="{Binding}" />
+                        <hpv:HomePageView DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:ProjectSettingsDialogViewModel}">
-                        <dialogs:ProjectSettingsDialog ViewModel="{Binding}" />
+                        <dialogs:ProjectSettingsDialog DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:ScriptManagerViewModel}">
-                        <dialogs:ScriptManagerView ViewModel="{Binding}" />
+                        <dialogs:ScriptManagerView DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:UpdateDialogViewModel}">
-                        <dialogs:UpdateDialog ViewModel="{Binding}" />
+                        <dialogs:UpdateDialog DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:ExtractEmbeddedFileDialogViewModel}">
-                        <dialogs:ExtractEmbeddedFileDialog ViewModel="{Binding}" />
+                        <dialogs:ExtractEmbeddedFileDialog DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:ImportArgsDialogViewModel}">
-                        <dialogs:ImportArgsDialog ViewModel="{Binding}" />
+                        <dialogs:ImportArgsDialog DataContext="{Binding}" />
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type dialogVMs:ExportArgsDialogViewModel}">
-                        <dialogs:ExportArgsDialog ViewModel="{Binding}" />
+                        <dialogs:ExportArgsDialog DataContext="{Binding}" />
                     </DataTemplate>
                     <Storyboard x:Key="OverlayFadeIn">
                         <DoubleAnimation

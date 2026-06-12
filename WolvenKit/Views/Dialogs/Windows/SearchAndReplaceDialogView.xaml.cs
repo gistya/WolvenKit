@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using WolvenKit.App.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -24,23 +25,11 @@ namespace WolvenKit.Views.Dialogs.Windows
             LoadLastSelection();
             
             {
-                        x => x.SearchText,
-                        x => x.SearchTextBox.Text)
-
-                        x => x.ReplaceText,
-                        x => x.ReplaceTextBox.Text)
-                        x => x.RememberValues,
-                        x => x.RememberValuesCheckBox.IsChecked)
-                        x => x.IsRegex,
-                        x => x.IsRegexCheckbox.IsChecked)
-                        x => x.IsWholeWord,
-                        x => x.IsWholeWordCheckbox.IsChecked)
-
                 if (ViewModel.ReplaceText != "")
                 {
                     ReplaceTextBox.Focus();
                 }
-            });
+            }
         }
 
         public SearchAndReplaceDialogViewModel ViewModel { get; set; }

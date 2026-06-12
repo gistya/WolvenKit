@@ -4,6 +4,7 @@ using System.Windows;
 using HelixToolkit.Wpf.SharpDX;
 using Syncfusion.Windows.PropertyGrid;
 using WolvenKit.App.ViewModels.Tools;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Tools
 {
@@ -12,6 +13,12 @@ namespace WolvenKit.Views.Tools
     /// </summary>
     public partial class PropertiesView : System.Windows.Controls.UserControl
     {
+        public PropertiesViewModel ViewModel
+        {
+            get => DataContext as PropertiesViewModel;
+            set => DataContext = value;
+        }
+
         public string _fileName;
 
         public PropertiesView()
@@ -66,17 +73,7 @@ namespace WolvenKit.Views.Tools
 
         private void PropertyGrid_OnAutoGeneratingPropertyGridItem(object sender, AutoGeneratingPropertyGridItemEventArgs e)
         {
-            switch (e.DisplayName)
-            {
-                case nameof(ReactiveObject.Changed):
-                case nameof(ReactiveObject.Changing):
-                case nameof(ReactiveObject.ThrownExceptions):
-                    e.Cancel = true;
-                    break;
-                default:
-                    break;
-            }
-            e.ReadOnly = true;
+e.ReadOnly = true;
         }
 
         private void ReloadModels(object sender, RoutedEventArgs e) => hxViewport.ZoomExtents();

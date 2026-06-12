@@ -45,7 +45,6 @@ namespace WolvenKit.Views.Editors
             var type = model.InterpolationType;
 
 
-
             switch (_elementType)
             {
                 case "HDRColor":

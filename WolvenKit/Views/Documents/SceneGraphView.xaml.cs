@@ -25,6 +25,7 @@ using WolvenKit.App.Interaction;
 using WolvenKit.Views.Dialogs;
 using AdonisUI.Controls;
 using WolvenKit.Core.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Documents
 {
@@ -33,6 +34,8 @@ namespace WolvenKit.Views.Documents
     /// </summary>
     public partial class SceneGraphView : UserControl, IDisposable
     {
+        public SceneGraphViewModel? ViewModel { get => DataContext as SceneGraphViewModel; set => DataContext = value; }
+
         // Navigation memory: tracks which child was last visited from each node in each direction
         private readonly Dictionary<(uint nodeId, Key direction), uint> _navigationMemory = new();
         private readonly List<uint> _navigationHistory = new();
@@ -722,7 +725,6 @@ namespace WolvenKit.Views.Documents
         }
 
 
-
         /// <summary>
         /// Get the center point of the current viewport for placing new nodes
         /// </summary>
@@ -840,6 +842,7 @@ namespace WolvenKit.Views.Documents
         /// <summary>
         /// Global event handler for document switches (handles ALL scene documents)
         /// </summary>
+        private static void OnGlobalAppViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(AppViewModel.ActiveDocument) || s_globalAppViewModel == null)
             {
@@ -862,7 +865,6 @@ namespace WolvenKit.Views.Documents
                 RestoreSelectionStatic(newActiveDocument);
             }
         }
-
 
 
         /// <summary>
@@ -915,7 +917,6 @@ namespace WolvenKit.Views.Documents
         {
             return document?.FilePath;
         }
-
 
 
         /// <summary>

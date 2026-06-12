@@ -11,6 +11,12 @@ namespace WolvenKit.Views.Documents
 {
     public partial class RedDocumentView : System.Windows.Controls.UserControl
     {
+        public RedDocumentViewModel ViewModel
+        {
+            get => DataContext as RedDocumentViewModel;
+            set => DataContext = value;
+        }
+
         public RedDocumentView()
         {
             InitializeComponent();

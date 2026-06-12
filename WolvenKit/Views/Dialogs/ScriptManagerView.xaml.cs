@@ -15,12 +15,16 @@ namespace WolvenKit.Views.Dialogs;
 /// </summary>
 public partial class ScriptManagerView : System.Windows.Controls.UserControl
 {
+        public ScriptManagerViewModel ViewModel
+        {
+            get => DataContext as ScriptManagerViewModel;
+            set => DataContext = value;
+        }
+
     public ScriptManagerView()
     {
         InitializeComponent();
 
-        {
-        });
     }
 
     private void ScriptsTreeGrid_OnItemsSourceChanged(object sender, TreeGridItemsSourceChangedEventArgs e)

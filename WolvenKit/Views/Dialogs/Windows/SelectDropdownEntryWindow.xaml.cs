@@ -32,14 +32,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            {
-                        x => x.SelectedOption,
-                        x => x.Dropdown.SelectedOption)
-                        x => x.OptionsDict,
-                        x => x.Dropdown.Options)
-
-                ViewModel.SelectedOption = string.Empty;
-            });
+            ViewModel.SelectedOption = string.Empty;
         }
 
 

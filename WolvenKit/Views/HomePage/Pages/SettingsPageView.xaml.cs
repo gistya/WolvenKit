@@ -4,11 +4,18 @@ using WolvenKit.App.Services;
 using WolvenKit.Controls;
 using WolvenKit.ViewModels;
 using static WolvenKit.Converters.PropertyGridEditors;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.HomePage.Pages
 {
     public partial class SettingsPageView : System.Windows.Controls.UserControl
     {
+        public SettingsPageViewModel ViewModel
+        {
+            get => DataContext as SettingsPageViewModel;
+            set => DataContext = value;
+        }
+
         public SettingsPageView()
         {
             InitializeComponent();
@@ -16,33 +23,13 @@ namespace WolvenKit.Views.HomePage.Pages
             ViewModel = WolvenKit.AppImpl.Services?.GetService<SettingsPageViewModel>();
             DataContext = ViewModel;
 
-            {
-                    viewModel => viewModel.Settings,
-                    view => view.SettingsPropertygrid.SelectedObject)
-
-                      viewModel => viewModel.MainViewModel.CheckForUpdatesCommand,
-                      view => view.CheckForUpdatesButton)
-
-                      viewModel => viewModel.MainViewModel.CloseModalCommand,
-                      view => view.SaveCloseButton)
-            });
         }
 
         public ItemCollection AccordionItems { get; set; }
 
         private void SettingsPropertygrid_OnAutoGeneratingPropertyGridItem(object sender, AutoGeneratingPropertyGridItemEventArgs e)
         {
-            switch (e.DisplayName)
-            {
-                case nameof(ReactiveObject.Changed):
-                case nameof(ReactiveObject.Changing):
-                case nameof(ReactiveObject.ThrownExceptions):
-                    e.Cancel = true;
-                    break;
-                default:
-                    break;
-            }
-            // Generate special editors for the properties for which default is not ok
+// Generate special editors for the properties for which default is not ok
             if (e.OriginalSource is not PropertyItem { } propertyItem)
             {
                 return;

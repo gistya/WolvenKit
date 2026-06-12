@@ -30,12 +30,9 @@ namespace WolvenKit.Views.Dialogs.Windows
             Owner = Application.Current.MainWindow;
 
             {
-                        x => x.ItemName,
-                        x => x.ItemNameTextBox.Text)
-
                 ItemSubtypeControl.SetCurrentValue(IsEnabledProperty, false);
                 EquipmentExControl.SetCurrentValue(IsEnabledProperty, false);
-            });
+            }
         }
 
         public AddArchiveXlFilesDialogViewModel ViewModel { get; set; }

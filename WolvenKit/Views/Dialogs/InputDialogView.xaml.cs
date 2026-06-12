@@ -10,22 +10,17 @@ namespace WolvenKit.Views.Dialogs
         public InputDialogView(string dialogTitle = "", string defaultValue = "")
         {
             DialogTitle = dialogTitle;
-            
+
             InitializeComponent();
             Loaded += (s, e) => TextBox.Focus();
 
             ViewModel = new InputDialogViewModel(dialogTitle, defaultValue);
             DataContext = ViewModel;
 
+            if (defaultValue != "")
             {
-                        x => x.Text,
-                        x => x.TextBox.Text)
-
-                if (defaultValue != "")
-                {
-                    TextBox.SelectAll();
-                }
-            });
+                TextBox.SelectAll();
+            }
         }
 
         public string DialogTitle;

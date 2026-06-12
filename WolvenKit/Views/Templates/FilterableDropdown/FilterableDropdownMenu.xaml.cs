@@ -12,10 +12,7 @@ namespace WolvenKit.Views.Editors
     /// <example>
     /// Two-way binding doesn't work, needs to bind like this:
     /// <code>
-    /// {
-    ///            x => x.ComponentName,
-    ///            x => x.FilterableDropdownMenu.SelectedOption)
-    ///});
+    /// 
     /// </code>
     /// </example>
     public partial class FilterableDropdownMenu : UserControl, INotifyPropertyChanged

@@ -24,26 +24,7 @@ namespace WolvenKit.Views.Dialogs.Windows
             ViewModel = AddRadioExtFilesDialogViewModel.GetInstance(project, templateFileTools);
             DataContext = ViewModel;
 
-            {
-                        x => x.StationName,
-                        x => x.StationNameTextBox.Text)
-                        x => x.IconFilePath,
-                        x => x.IconPathTextBox.Text)
-                        x => x.Frequency,
-                        x => x.StationFrequencyTextBox.Text)
-                        x => x.UseStream,
-                        x => x.UseStreamCheckBox.IsChecked)
-
-                // stream URL
-                        x => x.StreamPath,
-                        x => x.StreamPathTextBox.Text)
-
-                // Grid with songs
-                        x => x.SongItems,
-                        x => x.SongsGrid.ItemsSource)
-
-                SongsGrid.RowDragDropController.Drop += SongsGrid_OnDrop;
-            });
+            
         }
 
         public AddRadioExtFilesDialogViewModel ViewModel { get; set; }

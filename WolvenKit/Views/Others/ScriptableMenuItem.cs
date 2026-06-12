@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using WolvenKit.App.Scripting;
 using WolvenKit.App.Services;
 using WolvenKit.Views.Templates;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Others;
 

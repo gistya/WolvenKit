@@ -23,6 +23,7 @@ namespace WolvenKit.Views.Shell
 {
     public class MyObservableCollection : ObservableCollection<object> { }
 
+    public partial class MainView
     {
         public AppViewModel ViewModel { get; private set; }
 

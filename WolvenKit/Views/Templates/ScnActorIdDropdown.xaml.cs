@@ -6,6 +6,7 @@ using WolvenKit.App.Helpers;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 using WolvenKit.Core.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Editors
 {

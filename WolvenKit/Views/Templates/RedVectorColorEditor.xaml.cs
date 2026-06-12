@@ -1,8 +1,9 @@
 using System;
-using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.Input;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 
@@ -19,7 +20,7 @@ namespace WolvenKit.Views.Editors
         {
             InitializeComponent();
 
-            SelectedVectorColorCommand = ReactiveCommand.Create<object>(OnColorPicked);
+            SelectedVectorColorCommand = new RelayCommand<object>(OnColorPicked);
         }
 
         public CColor RedVectorColor
@@ -32,7 +33,7 @@ namespace WolvenKit.Views.Editors
             nameof(RedVectorColor), typeof(CColor), typeof(RedVectorColorEditor),
             new PropertyMetadata(default(CColor)));
 
-        public ReactiveCommand<object, Unit> SelectedVectorColorCommand { get; set; }
+        public ICommand SelectedVectorColorCommand { get; }
 
         public Color Color
         {

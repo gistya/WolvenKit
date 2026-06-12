@@ -14,11 +14,18 @@ using WolvenKit.App.ViewModels.Tools;
 using WolvenKit.Common.Interfaces;
 using WolvenKit.Common.Model;
 using WolvenKit.Core.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Tools
 {
     public partial class AssetBrowserView : System.Windows.Controls.UserControl
     {
+        public AssetBrowserViewModel ViewModel
+        {
+            get => DataContext as AssetBrowserViewModel;
+            set => DataContext = value;
+        }
+
         private string _currentFolderQuery = "";
 
 
@@ -37,51 +44,7 @@ namespace WolvenKit.Views.Tools
             _modifierViewSvc.ModifierStateChanged += OnModifierStateChanged;
 
 
-            {
-                if (DataContext is AssetBrowserViewModel vm)
-                {
-                }
-
-                      viewModel => viewModel.SearchBarText,
-                      view => view.FileSearchBar.Text)
-
-                        viewModel => viewModel.IsModBrowserEnabled,
-                        view => view.IsModBrowserEnabled)
-
-                // left navigation
-                        viewModel => viewModel.LeftItems,
-                        view => view.LeftNavigation.ItemsSource)
-                        viewModel => viewModel.LeftSelectedItem,
-                        view => view.LeftNavigation.SelectedItem)
-
-                // right file list
-                        viewModel => viewModel.RightItems,
-                        view => view.RightFileView.ItemsSource)
-                        viewModel => viewModel.RightSelectedItem,
-                        view => view.RightFileView.SelectedItem)
-                        viewModel => viewModel.RightSelectedItems,
-                        view => view.RightFileView.SelectedItems)
-                        viewModel => viewModel.FindUsesCommand,
-                        view => view.RightContextMenuFindUsesMenuItem)
-                      viewModel => viewModel.FindUsingCommand,
-                      view => view.RightContextMenuFindUsingMenuItem)
-                      viewModel => viewModel.BrowseToFolderCommand,
-                      view => view.RightContextMenuBrowseToFolder)
-                      viewModel => viewModel.CopyRelPathCommand,
-                      view => view.RightContextMenuCopyPathMenuItem)
-                        viewModel => viewModel.CopyRelPathFileNameCommand,
-                        view => view.RightContextMenuCopyNameMenuItem)
-                        viewModel => viewModel.CopyRelPathFileNameNoExtensionCommand,
-                        view => view.RightContextMenuCopyFileNameNoExtensionMenuItem)
-                      viewModel => viewModel.OpenFileOnlyCommand,
-                      view => view.OpenFileOnly)
-                      viewModel => viewModel.AddSelectedCommand,
-                      view => view.AddSelected)
-                    viewModel => viewModel.AddFromArchiveCommand,
-                    view => view.AddFromArchive);
-
-                LeftNavigation.KeyUp += LeftNavigation_KeyDown;
-            });
+            
 
         }
 

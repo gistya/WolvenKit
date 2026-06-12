@@ -8,6 +8,12 @@ namespace WolvenKit.Views.Dialogs;
 
 public partial class ExtractEmbeddedFileDialog : System.Windows.Controls.UserControl
 {
+        public ExtractEmbeddedFileDialogViewModel ViewModel
+        {
+            get => DataContext as ExtractEmbeddedFileDialogViewModel;
+            set => DataContext = value;
+        }
+
     public ExtractEmbeddedFileDialog()
     {
         InitializeComponent();

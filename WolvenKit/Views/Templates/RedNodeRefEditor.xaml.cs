@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -9,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using WolvenKit.App.Services;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Editors
 {

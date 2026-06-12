@@ -12,6 +12,12 @@ namespace WolvenKit.Views.Shell
 {
     public partial class RibbonView : System.Windows.Controls.UserControl
     {
+        public RibbonViewModel ViewModel
+        {
+            get => DataContext as RibbonViewModel;
+            set => DataContext = value;
+        }
+
         private readonly ISettingsManager _settingsManager;
         private readonly ILoggerService _loggerService;
 

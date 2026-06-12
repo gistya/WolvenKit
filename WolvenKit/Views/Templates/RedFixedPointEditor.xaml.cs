@@ -1,5 +1,4 @@
 using System;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,14 +18,20 @@ namespace WolvenKit.Views.Editors
         {
             InitializeComponent();
 
-            Observable.FromEventPattern<TextChangedEventHandler, TextChangedEventArgs>(
-                handler => TextBox.TextChanged += handler,
-                handler => TextBox.TextChanged -= handler)
-                .Throttle(TimeSpan.FromSeconds(.5))
-                .Subscribe(x =>
-                {
-                    SetRedValue(TextBox.Text);
-                });
+                        var throttleTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(.5)
+            };
+            throttleTimer.Tick += (_, _) =>
+            {
+                throttleTimer.Stop();
+                SetRedValue(TextBox.Text);
+            };
+            TextBox.TextChanged += (_, _) =>
+            {
+                throttleTimer.Stop();
+                throttleTimer.Start();
+            };
         }
 
         public FixedPoint RedNumber

@@ -2,6 +2,7 @@ using System.Linq;
 using Syncfusion.UI.Xaml.Grid;
 using WolvenKit.App.Extensions;
 using WolvenKit.App.ViewModels.HomePage.Pages;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.HomePage.Pages
 {
@@ -10,6 +11,12 @@ namespace WolvenKit.Views.HomePage.Pages
     /// </summary>
     public partial class ModsView : System.Windows.Controls.UserControl
     {
+        public ModsViewModel ViewModel
+        {
+            get => DataContext as ModsViewModel;
+            set => DataContext = value;
+        }
+
         public ModsView()
         {
             InitializeComponent();
@@ -52,7 +59,6 @@ namespace WolvenKit.Views.HomePage.Pages
             if (e.IsFromOutSideSource)
             {
                 // install mod
-
 
 
             }

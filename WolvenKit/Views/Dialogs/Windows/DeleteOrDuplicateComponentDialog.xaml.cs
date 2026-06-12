@@ -22,20 +22,9 @@ namespace WolvenKit.Views.Dialogs.Windows
             ViewModel = new DeleteOrDuplicateComponentDialogViewModel(componentNames, isDeleting);
             DataContext = ViewModel;
 
-            {
-                        x => x.ComponentName,
-                        x => x.FilterableDropdownMenu.SelectedOption)
-                        x => x.ComponentNames,
-                        x => x.FilterableDropdownMenu.Options)
-            });
         }
 
         public DeleteOrDuplicateComponentDialogViewModel ViewModel { get; set; }
-
-        {
-            get => ViewModel;
-            set => ViewModel = (DeleteOrDuplicateComponentDialogViewModel)value;
-        }
 
         public bool? ShowDialog(Window owner)
         {

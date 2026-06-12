@@ -12,17 +12,18 @@ namespace WolvenKit.Views.Dialogs
     /// </summary>
     public partial class SoundModdingView : System.Windows.Controls.UserControl
     {
+        public SoundModdingViewModel ViewModel
+        {
+            get => DataContext as SoundModdingViewModel;
+            set => DataContext = value;
+        }
+
         public SoundModdingView()
         {
             InitializeComponent();
 
 
-            {
-                    vm => vm.SoundEvents,
-                    v => v.DataGridEvents.ItemsSource)
-
-
-            });
+            
         }
 
         private void ButtonAddAll_Click(object sender, System.Windows.RoutedEventArgs e)

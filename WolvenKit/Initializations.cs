@@ -25,7 +25,7 @@ namespace WolvenKit
         /// </summary>
         public static void InitializeThemeHelper()
         {
-            var settingsManager = Locator.Current.GetService<ISettingsManager>();
+            var settingsManager = AppImpl.Services?.GetService<ISettingsManager>();
 
             HandyControl.Themes.ThemeManager.Current.SetCurrentValue(HandyControl.Themes.ThemeManager.ApplicationThemeProperty, HandyControl.Themes.ApplicationTheme.Dark);
             if (settingsManager.UiScale == 0)

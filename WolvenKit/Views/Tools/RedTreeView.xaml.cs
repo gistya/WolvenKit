@@ -24,6 +24,7 @@ using WolvenKit.Core.Services;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.Dialogs.Windows;
 using WolvenKit.Views.Shell;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Tools
 {

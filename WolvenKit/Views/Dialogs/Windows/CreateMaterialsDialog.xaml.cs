@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using WolvenKit.App.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -20,19 +21,6 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             LoadLastSelection();
 
-            {
-                        x => x.BaseMaterial,
-                        x => x.BaseMaterialBox.Text)
-
-                        x => x.IsLocalMaterial,
-                        x => x.LocalMaterialCheckBox.IsChecked)
-
-                        x => x.ResolveSubstitutions,
-                        x => x.ResolveDynamicCheckBox.IsChecked)
-
-                        x => x.RememberValues,
-                        x => x.RememberValuesCheckBox.IsChecked)
-            });
         }
 
         public CreateMaterialsDialogViewModel ViewModel { get; set; }

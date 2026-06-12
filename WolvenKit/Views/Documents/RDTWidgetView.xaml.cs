@@ -17,6 +17,7 @@ using WolvenKit.Core.Interfaces;
 using WolvenKit.Functionality.Layout.inkWidgets;
 using WolvenKit.RED4.Archive.Buffer;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Documents
 {
@@ -25,6 +26,12 @@ namespace WolvenKit.Views.Documents
     /// </summary>
     public partial class RDTWidgetView : System.Windows.Controls.UserControl
     {
+        public RDTWidgetViewModel ViewModel
+        {
+            get => DataContext as RDTWidgetViewModel;
+            set => DataContext = value;
+        }
+
 
         public List<inkControl> Widgets = new();
 
@@ -44,7 +51,6 @@ namespace WolvenKit.Views.Documents
             }
             // The OneWayBind for TextWidgets to ItemsSource should be in XAML as ItemsSource="{Binding TextWidgets.Values}" if not already.
         }
-    }
 
         private void Load()
         {

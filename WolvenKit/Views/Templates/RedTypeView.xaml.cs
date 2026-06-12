@@ -14,12 +14,6 @@ namespace WolvenKit.Views.Editors
         public RedTypeView()
         {
             InitializeComponent();
-
-            {
-                if (DataContext is ChunkViewModel vm)
-                {
-                }
-            });
         }
 
         public event EventHandler ValueChanged;

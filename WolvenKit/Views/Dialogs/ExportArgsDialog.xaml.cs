@@ -10,6 +10,12 @@ namespace WolvenKit.Views.Dialogs;
 
 public partial class ExportArgsDialog : System.Windows.Controls.UserControl
 {
+        public ExportArgsDialogViewModel ViewModel
+        {
+            get => DataContext as ExportArgsDialogViewModel;
+            set => DataContext = value;
+        }
+
     private readonly PropertyGrid _propertyGrid;
 
     public ExportArgsDialog()

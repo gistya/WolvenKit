@@ -3,6 +3,7 @@ using System.Windows;
 using WolvenKit.App.Helpers;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -19,10 +20,6 @@ namespace WolvenKit.Views.Dialogs.Windows
             ViewModel = WolvenKit.AppImpl.Services?.GetService<MaterialsRepositoryViewModel>();
             DataContext = ViewModel;
 
-            {
-
-
-            });
         }
 
         public MaterialsRepositoryViewModel ViewModel { get; set; }

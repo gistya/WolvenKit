@@ -25,31 +25,8 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             LoadLastSelection();
 
-            {
-                // bind to filteredDropdownMenu
-                        x => x.ComponentNames,
-                        x => x.FilterableDropdownMenu.Options)
-                        x => x.ComponentName,
-                        x => x.FilterableDropdownMenu.SelectedOption)
-
-                // bind rest of properties
-                        x => x.DepotPath,
-                        x => x.DepotPathBox.Text)
-                        x => x.NewComponentName,
-                        x => x.NewComponentNameBox.Text)
-                        x => x.MeshAppearance,
-                        x => x.MeshAppearanceNameBox.Text)
-                        x => x.RememberValues,
-                        x => x.RememberValuesCheckBox.IsChecked)
-            });
         }
-
-        public ChangeComponentPropertiesDialogViewModel ViewModel { get; set; }
-
-        {
-            get => ViewModel;
-            set => ViewModel = (ChangeComponentPropertiesDialogViewModel)value;
-        }
+    public ChangeComponentPropertiesDialogViewModel ViewModel { get; set; }
 
         public bool? ShowDialog(Window owner)
         {

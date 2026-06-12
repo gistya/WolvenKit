@@ -23,7 +23,7 @@ namespace WolvenKit.Views.Dialogs.Windows
                     ViewModel.BodyGender == PhotomodeBodyGender.Female);
                 RadioButtonMale.SetCurrentValue(System.Windows.Controls.Primitives.ToggleButton.IsCheckedProperty,
                     ViewModel.BodyGender == PhotomodeBodyGender.Male);
-            });
+            }
         }
 
         public PlayerHeadDialogViewModel ViewModel { get; set; }

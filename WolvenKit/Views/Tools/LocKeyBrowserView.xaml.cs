@@ -15,10 +15,7 @@ namespace WolvenKit.Views.Tools
         public LocKeyBrowserView()
         {
             InitializeComponent();
-            //{
-            //            viewModel => viewModel.SelectedRecord,
-            //            view => view.redTreeView.ItemsSource)
-            //});
+            //
         }
         private void TextBox_KeyEnterUpdate(object sender, KeyEventArgs e)
         {

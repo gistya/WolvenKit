@@ -13,24 +13,15 @@ public partial class ProjectSettingsDialog : System.Windows.Controls.UserControl
     {
         InitializeComponent();
 
+        MenuListBox.SelectionChanged += (_, e) =>
         {
-
-
-
-
-
-
-        });
-
-            .Subscribe(selectedItem =>
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] is ListBoxItem { Content: string name })
             {
-                if (selectedItem is ListBoxItem { Content: string name })
+                if (name == "General")
                 {
-                    if (name == "General")
-                    {
-                        GeneralPanel.SetCurrentValue(VisibilityProperty, Visibility.Visible);
-                    }
+                    GeneralPanel.SetCurrentValue(VisibilityProperty, Visibility.Visible);
                 }
-            });
+            }
+        };
     }
 }

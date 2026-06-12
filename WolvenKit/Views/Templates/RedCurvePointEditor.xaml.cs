@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using WolvenKit.RED4.Types;
@@ -15,8 +14,7 @@ namespace WolvenKit.Views.Editors
         {
             InitializeComponent();
 
-            this.WhenAnyValue(x => x.Value)
-                .Do(x => Debugger.Break());
+
         }
 
         public CFloat Point

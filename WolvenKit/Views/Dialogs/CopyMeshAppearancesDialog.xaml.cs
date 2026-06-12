@@ -25,12 +25,6 @@ namespace WolvenKit.Views.Dialogs
             };
             DataContext = ViewModel;
 
-            {
-                        x => x.SelectedOption,
-                        x => x.TextBox.Text)
-                        x => x.OptionsDict,
-                        x => x.FilterableChecklistMenu.CheckboxOptionsAndStates)
-            });
         }
 
         public CopyMeshAppearancesDialogViewModel ViewModel { get; set; }

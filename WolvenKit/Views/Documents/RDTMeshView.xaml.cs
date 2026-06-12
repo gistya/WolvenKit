@@ -16,6 +16,12 @@ namespace WolvenKit.Views.Documents
     /// </summary>
     public partial class RDTMeshView : System.Windows.Controls.UserControl
     {
+        public RDTMeshViewModel ViewModel
+        {
+            get => DataContext as RDTMeshViewModel;
+            set => DataContext = value;
+        }
+
         private TreeGridNodeContextMenuInfo _currentNode;
 
         public RDTMeshView()

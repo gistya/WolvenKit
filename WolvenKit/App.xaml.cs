@@ -1,10 +1,10 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -49,7 +49,7 @@ namespace WolvenKit
             SetupExceptionHandling();
 
             // load oodle
-            _settingsManager = Locator.Current.GetService<ISettingsManager>();
+            _settingsManager = AppImpl.Services?.GetService<ISettingsManager>();
             if (_settingsManager?.IsHealthy() == true && !Oodle.Load(_settingsManager.GetRED4OodleDll()))
             {
                 throw new FileNotFoundException($"{Core.Constants.Oodle} not found.");
@@ -67,9 +67,9 @@ namespace WolvenKit
                 return result;
             };
 
-            _settingsManager ??= Locator.Current.GetService<ISettingsManager>();
+            _settingsManager ??= AppImpl.Services?.GetService<ISettingsManager>();
 
-            _loggerService = Locator.Current.GetService<ILoggerService>();
+            _loggerService = AppImpl.Services?.GetService<ILoggerService>();
 
             _loggerService.Info("Starting application");
             _loggerService.Info($"Version: {_settingsManager.GetVersionNumber()}");
@@ -90,22 +90,28 @@ namespace WolvenKit
             DiscordHelper.SetEnabled(_settingsManager.IsDiscordRPCEnabled);
             DiscordHelper.InitializeDiscordRPC();
 
-            _settingsManager
-                .WhenPropertyChanged(settings => settings.UiScale)
-                .Skip(1)
-                .Subscribe(_ => OnUiScaleChanged());
+            if (_settingsManager is INotifyPropertyChanged npc)
+            {
+                npc.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(ISettingsManager.UiScale))
+                    {
+                        OnUiScaleChanged();
+                    }
+                };
+            }
 
             // Improve FCP (~5 000 ms)
             _ = Task.Run(() =>
             {
-                var hashService = Locator.Current.GetService<IHashService>();
+                var hashService = AppImpl.Services?.GetService<IHashService>();
                 hashService?.Load();
             });
 
             // Improve FCP (~250 ms)
             _ = Task.Run(() =>
             {
-                var cruidService = Locator.Current.GetService<CRUIDService>();
+                var cruidService = AppImpl.Services?.GetService<CRUIDService>();
                 cruidService?.Load();
             });
 
@@ -232,7 +238,7 @@ namespace WolvenKit
 
         private static void LogUnhandledException(Exception exception, string source)
         {
-            var _logger = Splat.Locator.Current.GetService<ILoggerService>();
+            var _logger = AppImpl.Services?.GetService<ILoggerService>();
             if (_logger == null)
             {
                 return;

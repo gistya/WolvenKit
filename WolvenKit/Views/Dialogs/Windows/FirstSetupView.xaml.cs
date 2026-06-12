@@ -1,4 +1,5 @@
 using WolvenKit.App.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -16,19 +17,7 @@ namespace WolvenKit.Views.Dialogs.Windows
                 {
                     ViewModel.ExecuteFinish();
                 };
-
-                        vm => vm.AllFieldsValid,
-                        v => v.WizardControl.FinishEnabled)
-
-                    vm => vm.OpenCP77GamePathCommand,
-
-                    vm => vm.OpenDepotPathCommand,
-
-                    ViewModel,
-                    vm => vm.OpenLinkCommand,
-                    v => v.helpButton,
-                    vm => vm.WikiHelpLink);
-            });
+            }
 
         }
 

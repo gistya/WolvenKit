@@ -14,13 +14,6 @@ namespace WolvenKit.Views.Dialogs.Windows
             ViewModel = new SelectAnimationPathViewModel(facialSetupPaths);
             DataContext = ViewModel;
 
-            {
-                // bind to filteredDropdownMenu
-                        x => x.AnimGraphOptions,
-                        x => x.FilterableDropdownMenu.Options)
-                        x => x.SelectedGraph,
-                        x => x.FilterableDropdownMenu.SelectedOption)
-            });
         }
 
         public SelectAnimationPathViewModel ViewModel { get; set; }

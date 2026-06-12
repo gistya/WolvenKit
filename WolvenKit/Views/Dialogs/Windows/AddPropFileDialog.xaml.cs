@@ -37,98 +37,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            {
-                        x => x.PropName,
-                        x => x.PropNameTextBox.Text)
-
-                // parent folder
-                        x => x.ParentFolder,
-                        x => x.ParentFolderDropdownMenu.dropdown.Text)
-                        x => x.ParentFolder,
-                        x => x.ParentFolderBox.Text)
-
-
-                        x => x.ProjectFolders,
-                        x => x.ParentFolderDropdownMenu.Options)
-
-                        x => x.ProjectMeshes,
-                        x => x.Mesh1DropdownMenu.Options)
-                        x => x.ProjectMeshes,
-                        x => x.Mesh2DropdownMenu.Options)
-                        x => x.ProjectMeshes,
-                        x => x.Mesh3DropdownMenu.Options)
-                        x => x.ProjectMeshes,
-                        x => x.Mesh4DropdownMenu.Options)
-
-                        x => x.MeshFile1,
-                        x => x.Mesh1DropdownMenu.dropdown.Text)
-                        x => x.MeshFile1UseAppearances,
-                        x => x.MeshFile1UseAppearancesCheckbox.IsChecked)
-                        x => x.MeshFile1ReadFromMesh,
-                        x => x.MeshFile1ReadAppearancesCheckbox.IsChecked)
-
-                        x => x.MeshFile2,
-                        x => x.Mesh2DropdownMenu.dropdown.Text)
-                        x => x.MeshFile2UseAppearances,
-                        x => x.MeshFile2UseAppearancesCheckbox.IsChecked)
-                        x => x.MeshFile2ReadFromMesh,
-                        x => x.MeshFile2ReadAppearancesCheckbox.IsChecked)
-
-                        x => x.MeshFile3,
-                        x => x.Mesh3DropdownMenu.dropdown.Text)
-                        x => x.MeshFile3UseAppearances,
-                        x => x.MeshFile3UseAppearancesCheckbox.IsChecked)
-                        x => x.MeshFile3ReadFromMesh,
-                        x => x.MeshFile3ReadAppearancesCheckbox.IsChecked)
-
-                        x => x.MeshFile4,
-                        x => x.Mesh4DropdownMenu.dropdown.Text)
-                        x => x.MeshFile4UseAppearances,
-                        x => x.MeshFile4UseAppearancesCheckbox.IsChecked)
-                        x => x.MeshFile4ReadFromMesh,
-                        x => x.MeshFile4ReadAppearancesCheckbox.IsChecked)
-
-
-                        x => x.MoveMeshesToFolder,
-                        x => x.MoveMeshesToFolderCheckbox.IsChecked)
-
-                        x => x.CleanupInvalidEntries,
-                        x => x.CleanupInvalidEntriesCheckbox.IsChecked)
-                        x => x.RememberSelection,
-                        x => x.RememberValuesCheckbox.IsChecked)
-
-                Mesh1DropdownMenu.dropdown.SelectionChanged += Mesh1SelectionChanged;
-                disposables.Add(Disposable.Create(() =>
-                    Mesh1DropdownMenu.dropdown.SelectionChanged -= Mesh1SelectionChanged));
-
-                Mesh2DropdownMenu.dropdown.SelectionChanged += Mesh2SelectionChanged;
-                disposables.Add(Disposable.Create(() =>
-                    Mesh2DropdownMenu.dropdown.SelectionChanged -= Mesh2SelectionChanged));
-
-                Mesh3DropdownMenu.dropdown.SelectionChanged += Mesh3SelectionChanged;
-                disposables.Add(Disposable.Create(() =>
-                    Mesh3DropdownMenu.dropdown.SelectionChanged -= Mesh3SelectionChanged));
-
-                Mesh4DropdownMenu.dropdown.SelectionChanged += Mesh4SelectionChanged;
-                disposables.Add(Disposable.Create(() =>
-                    Mesh4DropdownMenu.dropdown.SelectionChanged -= Mesh4SelectionChanged));
-
-                ParentFolderDropdownMenu.dropdown.SelectionChanged += ParentFolderSelectionChanged;
-                disposables.Add(Disposable.Create(() =>
-                    ParentFolderDropdownMenu.dropdown.SelectionChanged -= ParentFolderSelectionChanged));
-
-                ParentFolderBox.LostFocus += ParentFolder_LostFocus;
-
-                MeshFile1UseAppearancesCheckbox.SetCurrentValue(IsEnabledProperty, false);
-                MeshFile2UseAppearancesCheckbox.SetCurrentValue(IsEnabledProperty, false);
-                MeshFile3UseAppearancesCheckbox.SetCurrentValue(IsEnabledProperty, false);
-                MeshFile4UseAppearancesCheckbox.SetCurrentValue(IsEnabledProperty, false);
-                MoveMeshesToFolderCheckbox.SetCurrentValue(IsEnabledProperty, false);
-
-                AppearancesTextBox.LostFocus += AppearancesTextBox_FocusLost;
-
-                LoadDefaultValues();
-            });
+            
         }
 
         private void ParentFolder_LostFocus(object sender, RoutedEventArgs e) => SetMeshSelectionFilters();
@@ -146,12 +55,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             ParentFolderBox.SetCurrentValue(TextBox.TextProperty, comboBox.Text);
 
-            Task.Run(() =>
-            {
-                // wait for binding value to update
-                Task.Delay(100).Wait();
-                Dispatcher.Invoke(SetMeshSelectionFilters);
-            });
+            SetMeshSelectionFilters();
         }
 
         /// <summary>

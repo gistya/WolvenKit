@@ -1,4 +1,5 @@
 using WolvenKit.App.ViewModels.HomePage.Pages;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace WolvenKit.Views.HomePage.Pages
@@ -8,6 +9,12 @@ namespace WolvenKit.Views.HomePage.Pages
     /// </summary>
     public partial class PluginsToolView : System.Windows.Controls.UserControl
     {
+        public PluginsToolViewModel ViewModel
+        {
+            get => DataContext as PluginsToolViewModel;
+            set => DataContext = value;
+        }
+
         public PluginsToolView()
         {
             InitializeComponent();
@@ -15,8 +22,6 @@ namespace WolvenKit.Views.HomePage.Pages
             ViewModel = WolvenKit.AppImpl.Services?.GetService<PluginsToolViewModel>();
             DataContext = ViewModel;
 
-                    viewModel => viewModel.SyncCommand,
-                    view => view.CheckButton));
         }
     }
 }

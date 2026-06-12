@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using WolvenKit.App.Services;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Editors
 {

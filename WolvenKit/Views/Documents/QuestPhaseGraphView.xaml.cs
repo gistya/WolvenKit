@@ -23,6 +23,7 @@ using WolvenKit.Views.Dialogs;
 using WolvenKit.Views.GraphEditor;
 using WolvenKit.Core.Interfaces;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Documents
 {
@@ -48,6 +49,8 @@ namespace WolvenKit.Views.Documents
     /// </summary>
     public partial class QuestPhaseGraphView : UserControl, IDisposable
     {
+        public QuestPhaseGraphViewModel? ViewModel { get => DataContext as QuestPhaseGraphViewModel; set => DataContext = value; }
+
         // Navigation memory: tracks which child was last visited from each node in each direction
         private readonly Dictionary<(uint nodeId, Key direction), uint> _navigationMemory = new();
         private readonly List<uint> _navigationHistory = new();
@@ -172,7 +175,6 @@ namespace WolvenKit.Views.Documents
         }
 
 
-
         /// <summary>
         /// Dispose pattern implementation
         /// </summary>
@@ -266,10 +268,10 @@ namespace WolvenKit.Views.Documents
         }
 
 
-
         /// <summary>
         /// Handle document switching to deselect nodes when switching between quest phase and scene documents
         /// </summary>
+        private void OnAppViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (_disposed || e.PropertyName != nameof(AppViewModel.ActiveDocument) || _appViewModel == null)
             {
@@ -304,7 +306,6 @@ namespace WolvenKit.Views.Documents
                 // Clear NodeSelectionService - this is crucial for property panel
                 NodeSelectionService.Instance.SelectedNode = null;
             }
-
 
 
             // Restore selection when switching to quest phase documents FROM graph documents
@@ -1534,7 +1535,6 @@ namespace WolvenKit.Views.Documents
 
             return baseTitle;
         }
-
 
 
         /// <summary>

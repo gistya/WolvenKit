@@ -7,6 +7,8 @@ using WolvenKit.App.ViewModels.GraphEditor.Nodes.Scene;
 using WolvenKit.Core.Interfaces;
 using WolvenKit.RED4.Types;
 using WolvenKit.Views.GraphEditor;
+using WolvenKit.App.ViewModels.Documents;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Documents;
 /// <summary>
@@ -14,15 +16,18 @@ namespace WolvenKit.Views.Documents;
 /// </summary>
 public partial class RDTGraphView2
 {
+    public RDTGraphViewModel2 ViewModel
+    {
+        get => DataContext as RDTGraphViewModel2;
+        set => DataContext = value;
+    }
+
     public RDTGraphView2()
     {
         InitializeComponent();
 
         KeyDown += OnKeyDown;
-
-        {
-            BuildBreadcrumb();
-        });
+        Loaded += (_, _) => BuildBreadcrumb();
     }
 
     private void Editor_OnNodeDoubleClick(object sender, RoutedEventArgs e) => HandleSubGraph();

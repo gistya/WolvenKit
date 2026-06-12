@@ -35,40 +35,9 @@ public partial class ShowChecklistDialog
         ViewModel = new ShowChecklistDialogViewModel(options);
         DataContext = ViewModel;
 
-        {
-            // bind to filteredChecklistMenu
-                    x => x.ChecklistOptions,
-                    x => x.FilterableChecklistMenu.CheckboxOptionsAndStates)
-
-            // bind to selectedOptions
-            // Note: converter overrides removed with ReactiveUI migration. Collection conversion handled inside the menu or VM if needed.
-                    x => x.SelectedOptions,
-                    x => x.FilterableChecklistMenu.SelectedOptions)
-
-            // set filter text (if given)
-            FilterableChecklistMenu.SetCurrentValue(Templates.FilterableChecklistMenu.FilterTextProperty,
-                options.FilterDefaultValue);
-
-            // Load last selection if available
-            ViewModel.SelectedOptions = options.ChecklistOptions.Where(x => x.Value)
-                .Select(x => x.Key).ToList();
-
-            // bind rest of properties
-                    x => x.InputFieldText,
-                    x => x.TextInputBox.Text)
-
-                    x => x.RememberValues,
-                    x => x.RememberValuesCheckBox.IsChecked)
-        });
+        
     }
-
-
     public ShowChecklistDialogViewModel ViewModel { get; set; }
-
-    {
-        get => ViewModel;
-        set => ViewModel = (ShowChecklistDialogViewModel)value;
-    }
 
     public bool? ShowDialog(Window owner)
     {

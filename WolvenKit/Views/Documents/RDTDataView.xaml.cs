@@ -15,6 +15,12 @@ namespace WolvenKit.Views.Documents
     /// </summary>
     public partial class RDTDataView : System.Windows.Controls.UserControl
     {
+        public RDTDataViewModel ViewModel
+        {
+            get => DataContext as RDTDataViewModel;
+            set => DataContext = value;
+        }
+
         public RDTDataView()
         {
             InitializeComponent();

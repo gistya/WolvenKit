@@ -18,6 +18,7 @@ namespace WolvenKit.Views.Editors
 
             InitializeComponent();
 
+            Loaded += (_, _) =>
             {
                 if (DataContext is not ChunkViewModel vm)
                 {
@@ -50,7 +51,7 @@ namespace WolvenKit.Views.Editors
                 RedRefEditor.SetCurrentValue(RedRefEditor.RedRefProperty, redRef);
 
                 SetDropdownValueFromCvm();
-            });
+            };
         }
 
         #region properties

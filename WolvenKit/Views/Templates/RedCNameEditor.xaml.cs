@@ -11,6 +11,7 @@ using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Events;
 using WolvenKit.Modkit.Resources;
 using WolvenKit.RED4.Types;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Editors
 {

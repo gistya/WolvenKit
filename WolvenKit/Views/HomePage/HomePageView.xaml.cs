@@ -11,19 +11,16 @@ namespace WolvenKit.Views.HomePage
 {
     public partial class HomePageView
     {
+    public HomePageViewModel ViewModel
+    {
+        get => DataContext as HomePageViewModel;
+        set => DataContext = value;
+    }
+
         public HomePageView()
         {
             InitializeComponent();
 
-            {
-                        viewmodel => viewmodel.SelectedIndex,
-                        view => view.HomeTabs.SelectedIndex)
-
-                        viewModel => viewModel.CloseHomePageCommand,
-                        view => view.ToEditorButton)
-                        viewModel => viewModel.CheckForUpdatesCommand,
-                        view => view.CheckForUpdateButton)
-            });
 
         }
 

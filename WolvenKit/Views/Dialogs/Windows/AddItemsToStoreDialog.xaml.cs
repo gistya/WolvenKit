@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,38 +28,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             Owner = Application.Current.MainWindow;
 
-            {
-                        x => x.YamlFiles,
-                        x => x.YamlDropdownMenu.Options)
-                        x => x.YamlPath,
-                        x => x.YamlDropdownMenu.SelectedOption)
-
-                        x => x.RedsFiles,
-                        x => x.RedsDropdownMenu.Options)
-                        x => x.RedsPath,
-                        x => x.RedsDropdownMenu.SelectedOption)
-
-                        x => x.RememberValues,
-                        x => x.RememberValuesCheckbox.IsChecked)
-
-                #region validation
-
-                    .Select(_ => ViewModel?.CanSave())
-                    .BindTo(this, x => x.ViewModel.IsFinishEnabled);
-
-                    .Select(_ => ViewModel?.CanSave())
-                    .BindTo(this, x => x.ViewModel.IsFinishEnabled);
-
-                    .Select(_ => ViewModel?.CanSave())
-                    .BindTo(this, x => x.ViewModel.IsFinishEnabled);
-
-                #endregion
-
-                if (s_rememberValues && s_lastItemCodes.Count > 0)
-                {
-                    ItemCodesTextBox.SetCurrentValue(TextBox.TextProperty, string.Join("\n", s_lastItemCodes));
-                }
-            });
+            
         }
 
         public AddItemsToStoreDialogViewModel ViewModel { get; set; }

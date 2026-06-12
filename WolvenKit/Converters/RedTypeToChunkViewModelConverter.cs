@@ -8,6 +8,7 @@ using WolvenKit.App.Factories;
 using WolvenKit.App.ViewModels.Shell;
 using WolvenKit.RED4.Types;
 using WolvenKit.Core.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Converters
 {
@@ -19,7 +20,7 @@ namespace WolvenKit.Converters
         private readonly ConditionalWeakTable<RedBaseClass, ChunkViewModel> _cache = new();
         
         private static ILoggerService? s_loggerService;
-        private static ILoggerService? LoggerService => s_loggerService ??= Locator.Current.GetService<ILoggerService>();
+        private static ILoggerService? LoggerService => s_loggerService ??= AppImpl.Services?.GetService<ILoggerService>();
         
         // Singleton instance for cache management
         private static RedTypeToChunkViewModelConverter? _instance;
@@ -63,8 +64,8 @@ namespace WolvenKit.Converters
         {
             try
             {
-                var factory = Locator.Current.GetService<IChunkViewmodelFactory>();
-                var appViewModel = Locator.Current.GetService<AppViewModel>();
+                var factory = AppImpl.Services?.GetService<IChunkViewmodelFactory>();
+                var appViewModel = AppImpl.Services?.GetService<AppViewModel>();
                 
                 if (factory == null)
                 {

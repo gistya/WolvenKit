@@ -5,6 +5,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using WolvenKit.App.ViewModels.Documents;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Documents;
 /// <summary>
@@ -12,6 +13,12 @@ namespace WolvenKit.Views.Documents;
 /// </summary>
 public partial class WScriptDocumentView : System.Windows.Controls.UserControl
 {
+    public WScriptDocumentViewModel ViewModel
+    {
+        get => DataContext as WScriptDocumentViewModel;
+        set => DataContext = value;
+    }
+
     private CompletionWindow _completionWindow;
 
     public WScriptDocumentView()

@@ -33,11 +33,18 @@ using WolvenKit.Views.Dialogs.Windows;
 using appearanceAppearanceDefinition = WolvenKit.RED4.Types.appearanceAppearanceDefinition;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using WikiLinks = WolvenKit.Core.WikiLinks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Documents
 {
     public partial class RedDocumentViewMenuBar : System.Windows.Controls.UserControl
     {
+        public RedDocumentViewToolbarModel? ViewModel
+        {
+            get => DataContext as RedDocumentViewToolbarModel;
+            set => DataContext = value;
+        }
+
         private readonly AppScriptService _scriptService;
         private readonly ISettingsManager _settingsManager;
         private readonly IProjectManager _projectManager;
@@ -1024,8 +1031,7 @@ namespace WolvenKit.Views.Documents
             foreach (var propertyChild in appearances.TVProperties
                          .Select(a => a.GetPropertyChild(propertyName))
                          .Where(cvm => cvm is not null)
-                         .Select(cvm => cvm!)
-                    )
+                         .Select(cvm => cvm!))
             {
                 propertyChild.CalculateProperties();
                 if (propertyChild.TVProperties.Count == 0)

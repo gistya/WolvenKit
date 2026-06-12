@@ -5,6 +5,7 @@ using WolvenKit.Helpers;
 using Application = System.Windows.Application;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using Window = System.Windows.Window;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Dialogs.Windows
 {
@@ -24,7 +25,7 @@ namespace WolvenKit.Views.Dialogs.Windows
 
             {
                 SaveDataGrid.ClearFilters();
-            });
+            }
         }
 
         public SaveGameSelectionDialog(string currentSaveName) : this()

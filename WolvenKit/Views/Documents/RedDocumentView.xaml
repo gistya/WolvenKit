@@ -16,7 +16,7 @@
     <Grid hc:ThemeManager.RequestedAccentColor="{DynamicResource MahApps.Brushes.Accent3}">
         <Grid.Resources>
             <DataTemplate DataType="{x:Type docVM:RDTDataViewModel}">
-                <docV:RDTDataView ViewModel="{Binding}" />
+                <docV:RDTDataView DataContext="{Binding}" />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type docVM:RDTInkTextureAtlasViewModel}">
@@ -32,19 +32,19 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type docVM:RDTMeshViewModel}">
-                <docV:RDTMeshView ViewModel="{Binding}" />
+                <docV:RDTMeshView DataContext="{Binding}" />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type docVM:RDTWidgetViewModel}">
-                <docV:RDTWidgetView ViewModel="{Binding}" />
+                <docV:RDTWidgetView DataContext="{Binding}" />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type docVM:RDTGraphViewModel}">
-                <docV:RDTGraphView ViewModel="{Binding}" />
+                <docV:RDTGraphView DataContext="{Binding}" />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type docVM:RDTGraphViewModel2}">
-                <docV:RDTGraphView2 ViewModel="{Binding}" />
+                <docV:RDTGraphView2 DataContext="{Binding}" />
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type docVM:SceneGraphViewModel}">
@@ -65,7 +65,7 @@
         <docV:RedDocumentViewMenuBar
             x:Name="RedDocumentViewToolbar"
             Grid.Row="0"
-            ViewModel="{Binding}" />
+            DataContext="{Binding}" />
 
         <syncfusion:TabControlExt
             x:Name="TabControl"

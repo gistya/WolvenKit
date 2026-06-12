@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using NAudioWpfDemo.AudioPlaybackDemo;
 using WolvenKit.App.ViewModels.Tools;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WolvenKit.Views.Tools;
 /// <summary>
@@ -9,6 +10,12 @@ namespace WolvenKit.Views.Tools;
 /// </summary>
 public partial class AudioPlayerView : System.Windows.Controls.UserControl
 {
+        public AudioPlayerViewModel ViewModel
+        {
+            get => DataContext as AudioPlayerViewModel;
+            set => DataContext = value;
+        }
+
     public AudioPlayerView()
     {
         ViewModel = WolvenKit.AppImpl.Services?.GetService<AudioPlayerViewModel>();

@@ -13,6 +13,12 @@ namespace WolvenKit.Views.Shell;
 /// </summary>
 public partial class MenuBarView : System.Windows.Controls.UserControl
 {
+        public MenuBarViewModel ViewModel
+        {
+            get => DataContext as MenuBarViewModel;
+            set => DataContext = value;
+        }
+
     private AppViewModel _mainViewModel;
 
     //public static MaterialsRepositoryDialog MaterialsRepositoryDia { get; set; }
@@ -67,48 +73,22 @@ public partial class MenuBarView : System.Windows.Controls.UserControl
 
             // Build
             // Pack
-                    viewModel => viewModel.MainViewModel.PackModCommand,
-                    view => view.MenuItemPack)
-                    viewModel => viewModel.MainViewModel.PackRedModCommand,
-                    view => view.MenuItemPackRedmod)
 
             // Install
-                    viewModel => viewModel.MainViewModel.PackInstallModCommand,
-                    view => view.MenuItemPackInstallProject)
-                   viewModel => viewModel.MainViewModel.PackInstallRedModCommand,
-                   view => view.MenuItemPackInstallRedmodProject)
 
             // Launch
-                       viewModel => viewModel.MainViewModel.PackInstallRunCommand,
-                       view => view.ToolbarPackInstallLaunchButton)
-                       viewModel => viewModel.MainViewModel.PackInstallRedModRunCommand,
-                       view => view.ToolbarPackInstallRedmodLaunchButton)
 
             // Clean All
-                    viewModel => viewModel.MainViewModel.CleanAllCommand,
-                    view => view.MenuItemClean)
 
             // Hot Reload
-                    viewModel => viewModel.MainViewModel.HotInstallModCommand,
-                    view => view.MenuItemHotInstallProject)
 
             // Launch Profiles
-                    viewModel => viewModel.MainViewModel.LaunchOptionsCommand,
-                    view => view.MenuItemLaunchProfiles)
 
             // View
 
             // Tools
-                    viewModel => viewModel.MainViewModel.ShowSoundModdingToolCommand,
-                    view => view.MenuItemShowSoundModdingTool)
-                        viewModel => viewModel.OpenGameFolderCommand,
-                        view => view.MenuItemOpenGameFolder)
-                    viewModel => viewModel.MainViewModel.ShowScriptManagerCommand,
-                    view => view.MenuItemShowScriptManager)
 
             // Importers
-                    viewModel => viewModel.MainViewModel.ShowTextureImporterCommand,
-                    view => view.MenuItemShowTextureImporter)
             if (MenuItemShowTextureExporter != null) MenuItemShowTextureExporter.Command = _mainViewModel.ShowTextureExporterCommand;
             if (MenuItemShowHashTool != null) MenuItemShowHashTool.Command = _mainViewModel.ShowHashToolCommand;
 

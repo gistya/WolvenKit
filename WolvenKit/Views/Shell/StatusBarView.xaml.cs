@@ -6,6 +6,12 @@ namespace WolvenKit.Views.Shell
 {
     public partial class StatusBarView : System.Windows.Controls.UserControl
     {
+        public StatusBarViewModel ViewModel
+        {
+            get => DataContext as StatusBarViewModel;
+            set => DataContext = value;
+        }
+
         #region Constructors
 
         public StatusBarView()
