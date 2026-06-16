@@ -405,9 +405,25 @@ public partial class ProjectResourceTools
 
     private const string s_tempDirSuffix = "_wolvenkit_tempdir";
 
+    /// <summary>
+    /// Returns absolute paths of existing destination files that would be overwritten by a move/rename.
+    /// Callers must prompt the user before invoking <see cref="MoveAndRefactorAsync"/>.
+    /// </summary>
+    public List<string> GetFilesThatWouldBeOverwritten(string sourcePath, string destPath,
+        string absoluteFolderPrefix)
+    {
+        if (!TryPrepareMove(sourcePath, destPath, absoluteFolderPrefix, out var sourceFileOrDirAbsPath,
+                out var destAbsPath, out var files, out _))
+        {
+            return [];
+        }
+
+        return files;
+    }
+
     // TODO: Remove stupid AbsoluteFolderPrefix
     public async Task MoveAndRefactorAsync(string sourcePath, string destPath, string absoluteFolderPrefix,
-        bool refactor)
+        bool refactor, List<string> existingFilesToOverwrite)
     {
         if (_projectManager.ActiveProject is not Cp77Project activeProject)
         {
@@ -416,32 +432,9 @@ public partial class ProjectResourceTools
 
         var originalSourcePath = sourcePath;
 
-        var sourceRelPath = sourcePath;
-        var destRelPath = destPath;
-
-        var projectRootPath = string.Join(Path.DirectorySeparatorChar,
-            absoluteFolderPrefix.ToLower().Split(Path.DirectorySeparatorChar)[..^1]);
-
-        string destAbsPath;
-        string sourceFileOrDirAbsPath;
-
-        try
+        if (!TryPrepareMove(sourcePath, destPath, absoluteFolderPrefix, out var sourceFileOrDirAbsPath,
+                out var destAbsPath, out var files, out var sourceIsDirectory))
         {
-            destRelPath = FilepathValidationTools.SanitizeOsFilePath(destRelPath);
-            destAbsPath = ToAbsolutePath(destRelPath);
-
-            sourceRelPath = FilepathValidationTools.SanitizeOsFilePath(sourceRelPath);
-            sourceFileOrDirAbsPath = ToAbsolutePath(sourceRelPath);
-        }
-        catch (Exception e)
-        {
-            _loggerService.Error($"Failed to move \"{sourcePath}\" to \"{destPath}\": {e.Message}");
-            return;
-        }
-
-        if (sourceFileOrDirAbsPath == destAbsPath)
-        {
-            _loggerService.Info($"Skipping {sourceFileOrDirAbsPath} (refusing to copy on itself)...");
             return;
         }
 
@@ -452,21 +445,9 @@ public partial class ProjectResourceTools
         if (sourceFileOrDirAbsPath.Equals(destAbsPath, StringComparison.OrdinalIgnoreCase))
         {
             var newSourceDir = $"{destAbsPath.TrimEnd(Path.DirectorySeparatorChar)}{s_tempDirSuffix}";
-            await MoveAndRefactorAsync(sourceFileOrDirAbsPath, newSourceDir, absoluteFolderPrefix, refactor);
+            await MoveAndRefactorAsync(sourceFileOrDirAbsPath, newSourceDir, absoluteFolderPrefix, refactor,
+                existingFilesToOverwrite);
             sourceFileOrDirAbsPath = newSourceDir;
-        }
-
-        var sourceIsDirectory = Directory.Exists(sourceFileOrDirAbsPath);
-
-        List<string> files = [];
-
-        if (sourceIsDirectory)
-        {
-            files.AddRange(Directory.EnumerateFiles(sourceFileOrDirAbsPath, "*", SearchOption.AllDirectories));
-        }
-        else
-        {
-            files.Add(sourceFileOrDirAbsPath);
         }
 
         // the user is moving an empty directory
@@ -476,29 +457,7 @@ public partial class ProjectResourceTools
             return;
         }
 
-        files = files.Distinct().ToList();
-
-        var existingFiles = files.Where(file =>
-        {
-            var relativePath = Path.GetRelativePath(sourceFileOrDirAbsPath, file);
-            var targetFilePath = Path.Combine(destAbsPath, relativePath);
-            return File.Exists(targetFilePath);
-        }).ToList();
-
-        if (existingFiles.Count > 0)
-        {
-            var response = Interactions.ShowQuestionYesNo((
-                $"Do you want to overwrite the existing files {string.Join('\n', existingFiles)}?",
-                "One or more files already exists!"));
-
-            if (!response)
-            {
-                files = files.Except(existingFiles).ToList();
-            }
-        }
-
-        // Maybe the user doesn't want to overwrite files, and nothing is left
-        if (files.Count == 0)
+        if (existingFilesToOverwrite.Count > 0)
         {
             return;
         }
@@ -558,29 +517,80 @@ public partial class ProjectResourceTools
         }
 
         await ReplacePathInProjectAsync(activeProject, successfulReplacements);
-        return;
+    }
 
-        string ToAbsolutePath(string relativePath)
+    private bool TryPrepareMove(string sourcePath, string destPath, string absoluteFolderPrefix,
+        out string sourceFileOrDirAbsPath, out string destAbsPath, out List<string> files,
+        out bool sourceIsDirectory)
+    {
+        sourceFileOrDirAbsPath = "";
+        destAbsPath = "";
+        files = [];
+        sourceIsDirectory = false;
+
+        if (_projectManager.ActiveProject is null)
         {
-            var inputPath = relativePath;
-            if (Regex.IsMatch(inputPath, @"^\.+\\"))
-            {
-                inputPath = new Uri(new Uri(absoluteFolderPrefix), new Uri(inputPath, UriKind.Relative)).LocalPath;
-            }
-
-            if (!Path.IsPathRooted(inputPath))
-            {
-                return Path.Join(absoluteFolderPrefix, inputPath);
-            }
-
-            if (inputPath.StartsWith(string.Join(Path.DirectorySeparatorChar, projectRootPath),
-                    StringComparison.CurrentCultureIgnoreCase))
-            {
-                return inputPath;
-            }
-
-            throw new InvalidDataException($"{relativePath} is not a valid path");
+            return false;
         }
+
+        var projectRootPath = string.Join(Path.DirectorySeparatorChar,
+            absoluteFolderPrefix.ToLower().Split(Path.DirectorySeparatorChar)[..^1]);
+
+        try
+        {
+            var destRelPath = FilepathValidationTools.SanitizeOsFilePath(destPath);
+            destAbsPath = ToMoveAbsolutePath(destRelPath, absoluteFolderPrefix, projectRootPath);
+
+            var sourceRelPath = FilepathValidationTools.SanitizeOsFilePath(sourcePath);
+            sourceFileOrDirAbsPath = ToMoveAbsolutePath(sourceRelPath, absoluteFolderPrefix, projectRootPath);
+        }
+        catch (Exception e)
+        {
+            _loggerService.Error($"Failed to move \"{sourcePath}\" to \"{destPath}\": {e.Message}");
+            return false;
+        }
+
+        if (sourceFileOrDirAbsPath == destAbsPath)
+        {
+            _loggerService.Info($"Skipping {sourceFileOrDirAbsPath} (refusing to copy on itself)...");
+            return false;
+        }
+
+        sourceIsDirectory = Directory.Exists(sourceFileOrDirAbsPath);
+
+        if (sourceIsDirectory)
+        {
+            files.AddRange(Directory.EnumerateFiles(sourceFileOrDirAbsPath, "*", SearchOption.AllDirectories));
+        }
+        else
+        {
+            files.Add(sourceFileOrDirAbsPath);
+        }
+
+        files = files.Distinct().ToList();
+        return true;
+    }
+
+    private static string ToMoveAbsolutePath(string relativePath, string absoluteFolderPrefix, string projectRootPath)
+    {
+        var inputPath = relativePath;
+        if (Regex.IsMatch(inputPath, @"^\.+\\"))
+        {
+            inputPath = new Uri(new Uri(absoluteFolderPrefix), new Uri(inputPath, UriKind.Relative)).LocalPath;
+        }
+
+        if (!Path.IsPathRooted(inputPath))
+        {
+            return Path.Join(absoluteFolderPrefix, inputPath);
+        }
+
+        if (inputPath.StartsWith(string.Join(Path.DirectorySeparatorChar, projectRootPath),
+                StringComparison.CurrentCultureIgnoreCase))
+        {
+            return inputPath;
+        }
+
+        throw new InvalidDataException($"{relativePath} is not a valid path");
     }
 
 

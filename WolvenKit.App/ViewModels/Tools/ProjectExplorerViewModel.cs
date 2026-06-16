@@ -1023,45 +1023,78 @@ public partial class ProjectExplorerViewModel : ToolViewModel
     [RelayCommand(CanExecute = nameof(CanRenameFile))]
     private async Task RenameFile()
     {
-        if (SelectedItem == null)
+        if (SelectedItem == null || ActiveProject == null || SelectedItem?.FullName is not string absolutePath)
         {
             return;
         }
 
-        if (_projectManager.ActiveProject is null || SelectedItem?.FullName is not string absolutePath)
-        {
-            return;
-        }
+        await InternalRenameFile(absolutePath);
+    }
 
-        var (prefixPath, relativePath) = _projectManager.ActiveProject.SplitFilePath(absolutePath);
+    // TODO start here...
+    private async Task InternalRenameFile(string fullPath)
+    {
+        var currentRawRelativePath =
 
-        if (absolutePath.StartsWith(_projectManager.ActiveProject.ModDirectory))
-        {
-            relativePath = absolutePath[(_projectManager.ActiveProject.ModDirectory.Length + 1)..];
-        }
-
-        var (newRelativePath, refactor) = Interactions.RenameAndRefactor((
-            relativePath,
-            absolutePath.StartsWith(_projectManager.ActiveProject.ModDirectory)
+        var (newRawRelativePath, refactor) = Interactions.RenameAndRefactor((
+            currentRawRelativePath,
+            absolutePath.StartsWith(ActiveProject.ModDirectory)
         ));
 
-        if (string.IsNullOrEmpty(newRelativePath) || newRelativePath == relativePath)
+        if (string.IsNullOrEmpty(newRawRelativePath) || newRawRelativePath == currentRawRelativePath)
         {
             return;
+        }
+
+        var existingFilesToOverwrite = _projectResourceTools.GetFilesThatWouldBeOverwritten(
+            currentRawRelativePath, newRawRelativePath, ActiveProject.FileDirectory);
+        var overwriteExistingFiles = false;
+
+        if (existingFilesToOverwrite.Count > 0)
+        {
+            overwriteExistingFiles = Interactions.ShowQuestionYesNo((
+                $"Do you want to overwrite the existing files {string.Join('\n', existingFilesToOverwrite)}?",
+                "One or more files already exists!"));
+
+            if (!overwriteExistingFiles)
+            {
+                return;
+            }
         }
 
         _deferredRefreshCts = new CancellationTokenSource();
         var token = _deferredRefreshCts.Token;
-        await BeginDeferredRefreshContext!(token, InternalRenameFile(SelectedItem, relativePath, newRelativePath, prefixPath, refactor));
+        await BeginDeferredRefreshContext!(token,
+            InternalRenameFile(SelectedItem, currentRawRelativePath, newRawRelativePath, ActiveProject.FileDirectory,
+                refactor, existingFilesToOverwrite));
         _gridGuard.ConfirmRedrawComplete();
 
         if (_gridGuard.GridsLocked)
         {
             throw new WolvenKitException(352345, "Internal inconsistency found. Please quit and restart the app.");
         }
+
     }
 
-    private async Task InternalRenameFile(FileSystemModel selectedItem, string relativePath, string newRelativePath, string prefixPath, bool refactor)
+    public async Task MoveFile(string fullPath, string newFullPath,
+        string prefixPath, bool refactor, bool overwriteExistingFiles)
+    {
+
+    }
+
+    /// <summary>
+    /// Renames the supplied FileSystemModel.
+    /// You must pass in the old RawRelativePath and new RawRelativePath as well as the path to /source.
+    /// 'Refactor' checkbox makes the name change effected in references to that file in the mod.
+    /// </summary>
+    /// <param name="selectedItem"></param>
+    /// <param name="relativePath"></param>
+    /// <param name="newRelativePath"></param>
+    /// <param name="prefixPath"></param>
+    /// <param name="refactor"></param>
+    /// <param name="existingFilesToOverwrite"></param>
+    public async Task InternalRenameFile(FileSystemModel selectedItem, string relativePath, string newRelativePath,
+        string prefixPath, bool refactor, List<string> existingFilesToOverwrite)
     {
         FileSystemModel renamed = new(
             parent: selectedItem.Parent,
@@ -1071,9 +1104,15 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             isExpanded: selectedItem.IsExpanded
         );
 
+        if (_projectWatcher.FileLookup.TryGetValue(selectedItem.FullName, out var existingFile))
+        {
+            _gridGuard.ProjectRemove(existingFile);
+        }
+
         _gridGuard.ProjectRename(renamed, selectedItem.FullName);
         SuspendFileWatcher();
-        await _projectResourceTools.MoveAndRefactorAsync(relativePath, newRelativePath, prefixPath, refactor);
+        await _projectResourceTools.MoveAndRefactorAsync(relativePath, newRelativePath, prefixPath, refactor,
+            existingFilesToOverwrite);
         _appViewModel.ReloadChangedFiles();
         ResumeFileWatcher();
     }

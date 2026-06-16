@@ -6,11 +6,14 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using DynamicData;
+using Splat;
 using WolvenKit.App.Extensions;
 using WolvenKit.App.Interaction;
+using WolvenKit.App.Models;
 using WolvenKit.App.Models.ProjectManagement.Project;
 using WolvenKit.App.Services;
 using WolvenKit.App.ViewModels.Dialogs;
+using WolvenKit.App.ViewModels.Tools;
 using WolvenKit.Common.Interfaces;
 using WolvenKit.Common.Services;
 using WolvenKit.Core.Interfaces;
@@ -1280,9 +1283,15 @@ public partial class TemplateFileTools
             {
                 var meshFileName = Path.GetFileName(prop.MeshFile1);
                 var meshFilePath = Path.Combine(prop.ParentFolder, meshFileName);
-                _projectResourceTools
-                    .MoveAndRefactorAsync(project.GetAbsolutePath(prop.MeshFile1),
-                        project.GetAbsolutePath(meshFilePath), "", false).GetAwaiter()
+                var projectExplorer = Locator.Current.GetService<ProjectExplorerViewModel>();
+                if (projectExplorer == null)
+                {
+                    return;
+                }
+
+                projectExplorer
+                    .MoveFile(project.GetAbsolutePath(prop.MeshFile1),
+                        project.GetAbsolutePath(meshFilePath), "", false, overwriteExistingFiles: true).GetAwaiter()
                     .GetResult();
                 prop.MeshFile1 = meshFilePath;
             }
@@ -1293,7 +1302,7 @@ public partial class TemplateFileTools
                 var meshFilePath = Path.Combine(prop.ParentFolder, meshFileName);
                 _projectResourceTools
                     .MoveAndRefactorAsync(project.GetAbsolutePath(prop.MeshFile2),
-                        project.GetAbsolutePath(meshFilePath), "", false).GetAwaiter()
+                        project.GetAbsolutePath(meshFilePath), "", false, overwriteExistingFiles: true).GetAwaiter()
                     .GetResult();
                 prop.MeshFile2 = meshFilePath;
             }
@@ -1304,7 +1313,7 @@ public partial class TemplateFileTools
                 var meshFilePath = Path.Combine(prop.ParentFolder, meshFileName);
                 _projectResourceTools
                     .MoveAndRefactorAsync(project.GetAbsolutePath(prop.MeshFile3),
-                        project.GetAbsolutePath(meshFilePath), "", false).GetAwaiter()
+                        project.GetAbsolutePath(meshFilePath), "", false, overwriteExistingFiles: true).GetAwaiter()
                     .GetResult();
                 prop.MeshFile3 = meshFilePath;
             }
@@ -1315,7 +1324,7 @@ public partial class TemplateFileTools
                 var meshFilePath = Path.Combine(prop.ParentFolder, meshFileName);
                 _projectResourceTools
                     .MoveAndRefactorAsync(project.GetAbsolutePath(prop.MeshFile4),
-                        project.GetAbsolutePath(meshFilePath), "", false).GetAwaiter()
+                        project.GetAbsolutePath(meshFilePath), "", false, overwriteExistingFiles: true).GetAwaiter()
                     .GetResult();
                 prop.MeshFile4 = meshFilePath;
             }
