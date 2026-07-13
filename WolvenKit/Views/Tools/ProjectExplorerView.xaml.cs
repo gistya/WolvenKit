@@ -438,7 +438,7 @@ namespace WolvenKit.Views.Tools
             CompositeDisposable disposables =
             [
                 TreeGridFlat.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh),
-        TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh)
+                TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh)
             ];
 
             using (disposables)
@@ -447,28 +447,26 @@ namespace WolvenKit.Views.Tools
 
                 DispatcherHelper.WaitUntilCancelled(deferRefreshToken, () =>
                 {
-                    // Re-apply filters while still inside the deferred refresh
+                    // Always keep filters — never set to null (tab filter + Flat directory exclusion)
                     if (TreeGridFlat?.View != null)
                     {
-                        TreeGridFlat.View.Filter = string.IsNullOrWhiteSpace(_currentFolderQuery) ? null : IsFileInFlat;
+                        TreeGridFlat.View.Filter = IsFileInFlat;
                         TreeGridFlat.View.RefreshFilter();
                     }
 
                     if (TreeGrid?.View != null)
                     {
-                        TreeGrid.View.Filter = string.IsNullOrWhiteSpace(_currentFolderQuery) ? null : IsFileIn;
+                        TreeGrid.View.Filter = IsFileIn;
                         TreeGrid.View.RefreshFilter();
                     }
                 });
             }
 
-            // After DeferRefresh is disposed — force layout cleanup
             InvalidateVirtualizedRows(TreeGrid);
             InvalidateVirtualizedRows(TreeGridFlat);
             TreeGrid.UpdateLayout();
             TreeGridFlat.UpdateLayout();
 
-            // Now safely expand when search is active
             if (!string.IsNullOrWhiteSpace(_currentFolderQuery) && TreeGrid?.View != null)
             {
                 TreeGrid.ExpandAllNodes();
