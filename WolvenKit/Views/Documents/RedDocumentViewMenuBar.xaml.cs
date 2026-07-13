@@ -88,7 +88,8 @@ namespace WolvenKit.Views.Documents
                 _documentTools,
                 Locator.Current.GetService<CRUIDService>()!,
                 _cvmTools,
-                _loggerService) { CurrentTab = _currentTab };
+                _loggerService,
+                _archiveManager) { CurrentTab = _currentTab };
             ViewModel = DataContext as RedDocumentViewToolbarModel;
 
             _modifierStateService.ModifierStateChanged += OnModifierStateChanged;
@@ -408,18 +409,17 @@ namespace WolvenKit.Views.Documents
                 return;
             }
 
-            var failedMeshes = selected.Where(mesh =>
-                !_documentTools.CopyMeshMaterials(currentPath, mesh, false)
-            ).ToList();
+            var failedMeshes = selected.Where(mesh => !_documentTools.CopyMeshMaterials(currentPath, mesh, false))
+                .ToList();
 
             var output = StringHelper.Stringify(selected.Where(s => !failedMeshes.Contains(s)).ToList(), true);
 
             if (failedMeshes.Count == 0)
             {
-                _loggerService.Success($"Copied materials from {currentPath} to {output}");
-                _notificationService.Success(
-                    $"Copied materials from {currentPath} to {selected.Count} file(s). Check the log for details.");
-                return;
+            _loggerService.Success($"Copied materials from {currentPath} to {output}");
+            _notificationService.Success(
+                $"Copied materials from {currentPath} to {selected.Count} file(s). Check the log for details.");
+            return;
             }
 
             output = output + ", but there were problems:\nMaterial copy failed for:" +
@@ -435,9 +435,18 @@ namespace WolvenKit.Views.Documents
         {
             _cvmTools.UnDynamifyMaterials(cvm);
             ViewModel?.DeleteUnusedMaterialsCommand?.NotifyCanExecuteChanged();
+            _notificationService.Success("Dynamic materials resolved");
+        }
+
+        private void ExpandMeshAppearances(ChunkViewModel? cvm)
+        {
+            _cvmTools.ExpandMeshAppearances(cvm, out var _, true);
+            ViewModel?.DeleteUnusedMaterialsCommand?.NotifyCanExecuteChanged();
+            _notificationService.Success("Mesh appearances expanded");
         }
 
         private void OnUnDynamifyMaterialsClick(object _, RoutedEventArgs e) => UnDynamifyMaterials(RootChunk);
+        private void OnExpandMeshAppearancesClick(object _, RoutedEventArgs e) => ExpandMeshAppearances(RootChunk);
 
         private void OnConvertHairToCCXLMaterials(object _, RoutedEventArgs e)
         {
