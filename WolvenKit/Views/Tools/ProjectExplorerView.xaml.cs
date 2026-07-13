@@ -433,46 +433,6 @@ namespace WolvenKit.Views.Tools
 
         #endregion Project_Loading
 
-        // private async Task BeginDeferredRefreshContext(CancellationToken deferRefreshToken, Task doBeforeRefresh)
-        // {
-        //     CompositeDisposable disposables =
-        //     [
-        //         TreeGridFlat.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh),
-        //         TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh)
-        //     ];
-        //
-        //     using (disposables)
-        //     {
-        //         await doBeforeRefresh;
-        //
-        //         DispatcherHelper.WaitUntilCancelled(deferRefreshToken, () =>
-        //         {
-        //             // Always keep filters — never set to null (tab filter + Flat directory exclusion)
-        //             if (TreeGridFlat?.View != null)
-        //             {
-        //                 TreeGridFlat.View.Filter = IsFileInFlat;
-        //                 TreeGridFlat.View.RefreshFilter();
-        //             }
-        //
-        //             if (TreeGrid?.View != null)
-        //             {
-        //                 TreeGrid.View.Filter = IsFileIn;
-        //                 TreeGrid.View.RefreshFilter();
-        //             }
-        //         });
-        //     }
-        //
-        //     InvalidateVirtualizedRows(TreeGrid);
-        //     InvalidateVirtualizedRows(TreeGridFlat);
-        //     TreeGrid.UpdateLayout();
-        //     TreeGridFlat.UpdateLayout();
-        //
-        //     if (!string.IsNullOrWhiteSpace(_currentFolderQuery) && TreeGrid?.View != null)
-        //     {
-        //         TreeGrid.ExpandAllNodes();
-        //     }
-        // }
-
         private async Task BeginDeferredRefreshContext(CancellationToken deferRefreshToken, Task doBeforeRefresh)
         {
             CompositeDisposable disposables =
@@ -493,27 +453,8 @@ namespace WolvenKit.Views.Tools
 
                         if (!_currentFolderQuery.IsNullOrEmpty())
                         {
-                            // Always keep filters — never set to null (tab filter + Flat directory exclusion)
-                            if (TreeGridFlat?.View != null)
-                            {
-                                TreeGridFlat.View.Filter = IsFileInFlat;
-                                TreeGridFlat.View.RefreshFilter();
-                            }
-
-                            if (TreeGrid?.View != null)
-                            {
-                                TreeGrid.View.Filter = IsFileIn;
-                                TreeGrid.View.RefreshFilter();
-                            }
-
-
-                            if (!string.IsNullOrWhiteSpace(_currentFolderQuery) && TreeGrid?.View != null)
-                            {
-                                TreeGrid.ExpandAllNodes();
-                            }
-
-                            // PESearchBar_OnSearchStarted(this,
-                            //     new FunctionEventArgs<string>(_currentFolderQuery));
+                            PESearchBar_OnSearchStarted(this,
+                                new FunctionEventArgs<string>(_currentFolderQuery));
                         }
                     }, 1);
                 });
