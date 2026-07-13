@@ -65,15 +65,26 @@ namespace WolvenKit.Views.Tools
         }
 
         private string _currentFolderQuery = "";
+        private readonly DispatcherTimer _searchDebounceTimer;
         private bool _isDragging;
         private ISettingsManager _settingsManager;
         private CancellationTokenSource _deferRefreshTokenSource = new();
+
+        private bool UseLiveSearch => SearchModeToggle?.IsChecked ?? true;
 
         #region Constructors
 
         public ProjectExplorerView()
         {
             InitializeComponent();
+
+            // Debounce timer for Live Search
+            _searchDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(350)
+            };
+            _searchDebounceTimer.Tick += SearchDebounceTimer_Tick;
+
             _settingsManager = Locator.Current.GetService<ISettingsManager>()!;
 
             TreeGrid.ItemsSourceChanged += TreeGrid_ItemsSourceChanged;
@@ -96,6 +107,7 @@ namespace WolvenKit.Views.Tools
             TreeGrid.NodeCollapsed += TreeGrid_OnNodeCollapsed;
 
             TreeGrid.NotificationSubscriptionMode = NotificationSubscriptionMode.CollectionChange;
+
 
             this.WhenActivated(disposables =>
             {
@@ -426,35 +438,41 @@ namespace WolvenKit.Views.Tools
             CompositeDisposable disposables =
             [
                 TreeGridFlat.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh),
-                TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh)
+        TreeGrid.View.DeferRefresh(TreeViewRefreshMode.DeferRefresh)
             ];
 
             using (disposables)
             {
                 await doBeforeRefresh;
 
-                RefreshFlatViewIfNeeded();
-                RefreshTreeViewIfNeeded();
-
                 DispatcherHelper.WaitUntilCancelled(deferRefreshToken, () =>
                 {
-                    DispatcherHelper.DelayOnMainThread(() =>
+                    // Re-apply filters while still inside the deferred refresh
+                    if (TreeGridFlat?.View != null)
                     {
-                        InvalidateLayout();
+                        TreeGridFlat.View.Filter = string.IsNullOrWhiteSpace(_currentFolderQuery) ? null : IsFileInFlat;
+                        TreeGridFlat.View.RefreshFilter();
+                    }
 
-                        if (!_currentFolderQuery.IsNullOrEmpty())
-                        {
-                            PESearchBar_OnSearchStarted(this,
-                                new FunctionEventArgs<string>(_currentFolderQuery));
-                        }
-                    }, 1);
+                    if (TreeGrid?.View != null)
+                    {
+                        TreeGrid.View.Filter = string.IsNullOrWhiteSpace(_currentFolderQuery) ? null : IsFileIn;
+                        TreeGrid.View.RefreshFilter();
+                    }
                 });
             }
 
-            DispatcherHelper.RunOnMainThread(() =>
+            // After DeferRefresh is disposed — force layout cleanup
+            InvalidateVirtualizedRows(TreeGrid);
+            InvalidateVirtualizedRows(TreeGridFlat);
+            TreeGrid.UpdateLayout();
+            TreeGridFlat.UpdateLayout();
+
+            // Now safely expand when search is active
+            if (!string.IsNullOrWhiteSpace(_currentFolderQuery) && TreeGrid?.View != null)
             {
-                 InvalidateLayout();
-            });
+                TreeGrid.ExpandAllNodes();
+            }
         }
 
         private void InvalidateLayout()
@@ -519,15 +537,12 @@ namespace WolvenKit.Views.Tools
         private void OnToggleFlatMode(object sender, EventArgs e)
         {
             if (sender is not ProjectExplorerViewModel model)
-            {
                 return;
-            }
 
             if (model.IsFlatModeEnabled)
             {
                 TreeGrid.SetCurrentValue(VisibilityProperty, Visibility.Collapsed);
                 TreeGridFlat.SetCurrentValue(VisibilityProperty, Visibility.Visible);
-                RefreshFlatViewIfNeeded();
             }
             else
             {
@@ -535,7 +550,7 @@ namespace WolvenKit.Views.Tools
                 TreeGridFlat.SetCurrentValue(VisibilityProperty, Visibility.Collapsed);
             }
 
-            PESearchBar_OnSearchStarted(this, new FunctionEventArgs<string>(_currentFolderQuery));
+            ApplyCurrentSearchFilter();
         }
 
         private void TreeGrid_OnNodeExpanding(object sender, NodeExpandingEventArgs e)
@@ -818,10 +833,16 @@ namespace WolvenKit.Views.Tools
                 return false;
             }
 
-            // Filtered by search
-            if (!string.IsNullOrWhiteSpace(_currentFolderQuery) && !fm.Name.Contains(_currentFolderQuery))
+            // Поиск: если запрос не пустой — проверяем и имя, и путь.
+            // Если папка совпала — все её дети тоже покажутся, потому что у них путь содержит имя папки.
+            if (!string.IsNullOrWhiteSpace(_currentFolderQuery))
             {
-                return false;
+                bool matches =
+                    fm.Name.Contains(_currentFolderQuery, StringComparison.OrdinalIgnoreCase) ||
+                    fm.RawRelativePath.Contains(_currentFolderQuery, StringComparison.OrdinalIgnoreCase);
+
+                if (!matches)
+                    return false;
             }
 
             return tabControl.SelectedIndex switch
@@ -840,7 +861,12 @@ namespace WolvenKit.Views.Tools
             }
         }
 
-        private bool IsFileInFlat(object o) => tabControl != null && o is FileSystemModel fm && IsFileIn(o) && !fm.IsDirectory;
+        //private bool IsFileInFlat(object o) => tabControl != null && o is FileSystemModel fm && IsFileIn(o) && !fm.IsDirectory;
+
+        private bool IsFileInFlat(object o)
+        {
+            return o is FileSystemModel fm && !fm.IsDirectory && IsFileIn(o);
+        }
 
         private void tabControl_SelectedIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -912,20 +938,29 @@ namespace WolvenKit.Views.Tools
 
         private void PESearchBar_OnSearchStarted(object sender, FunctionEventArgs<string> e)
         {
-            _currentFolderQuery = e.Info;
-            TreeGridFlat.View.RefreshFilter();
+            _searchDebounceTimer.Stop();
 
-            // Only force-expand everything when there is an active search query.
-            // This makes deep search results visible. When re-applying an empty query
-            // (e.g. after deferred structural changes like delete/convert, or when the
-            // user clears the search), we must NOT call ExpandAllNodes(), otherwise
-            // it overrides the user's saved/per-model IsExpanded states for all folders.
-            if (!string.IsNullOrEmpty(e.Info))
-            {
-                TreeGrid.ExpandAllNodes();
-            }
+            _currentFolderQuery = e.Info ?? string.Empty;
+            ApplyCurrentSearchFilter();
+        }
 
-            TreeGrid.View.RefreshFilter();
+        private void PESearchBar_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (SearchModeToggle?.IsChecked == false)
+                return;
+
+            _searchDebounceTimer?.Stop();
+            _searchDebounceTimer?.Start();
+        }
+
+        private void SearchModeToggle_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            _searchDebounceTimer?.Stop();
+
+            // Sync the current text from the SearchBar before applying the filter
+            _currentFolderQuery = PESearchBar.Text ?? string.Empty;
+
+            ApplyCurrentSearchFilter();
         }
 
         private void RowDragDropController_DragStart(object sender, TreeGridRowDragStartEventArgs e)
@@ -942,6 +977,49 @@ namespace WolvenKit.Views.Tools
             vm.SelectedItems?.RemoveMany(nonDraggedSelections);
 
             _isDragging = true;
+        }
+
+        /// <summary>
+        /// Applies the current search query to the active view (Tree or Flat)
+        /// </summary>
+        private void ApplyCurrentSearchFilter()
+        {
+            if (ViewModel?.IsFlatModeEnabled == true)
+            {
+                if (TreeGridFlat?.View != null)
+                {
+                    // Always keep filter in Flat mode (never show directories)
+                    TreeGridFlat.View.Filter = IsFileInFlat;
+                    TreeGridFlat.View.RefreshFilter();
+                }
+            }
+            else
+            {
+                if (TreeGrid?.View != null)
+                {
+                    // Always keep IsFileIn — it handles both search AND tab filtering
+                    TreeGrid.View.Filter = IsFileIn;
+                    TreeGrid.View.RefreshFilter();
+
+                    // Expand all nodes only when there is an active search query
+                    if (!string.IsNullOrWhiteSpace(_currentFolderQuery))
+                    {
+                        TreeGrid.ExpandAllNodes();
+                    }
+                }
+            }
+        }
+
+        private void SearchDebounceTimer_Tick(object sender, EventArgs e)
+        {
+            _searchDebounceTimer.Stop();
+
+            _currentFolderQuery = PESearchBar.Text ?? string.Empty;
+            ApplyCurrentSearchFilter();
+
+            // Возвращаем фокус
+            PESearchBar.Focus();
+            PESearchBar.Select(PESearchBar.Text?.Length ?? 0, 0);
         }
 
         private void RowDragDropController_DragOver(object sender, TreeGridRowDragOverEventArgs e)

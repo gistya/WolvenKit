@@ -2169,4 +2169,82 @@ public partial class ProjectExplorerViewModel : ToolViewModel
 
         ModifierStateService.OnKeystateChanged(e);
     }
+
+
+    public void ApplySearchFilter(string searchText)
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            _gridGuard.ForceReady();
+            return;
+        }
+
+        string search = searchText.Trim().ToLower();
+
+        if (IsFlatModeEnabled)
+            return; // Flat mode использует свой фильтр
+
+        var filteredRoots = new List<FileSystemModel>();
+
+        foreach (var root in FileTree)
+        {
+            var filteredNode = FilterNode(root, search);
+            if (filteredNode != null)
+            {
+                filteredRoots.Add(filteredNode);
+            }
+        }
+
+        _gridGuard.ProjectReset(filteredRoots, filteredRoots);
+    }
+
+    private FileSystemModel? FilterNode(FileSystemModel node, string search)
+    {
+        bool nameMatches = node.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                           node.RawRelativePath.Contains(search, StringComparison.OrdinalIgnoreCase);
+
+        if (nameMatches)
+        {
+            return node; // возвращаем оригинал — должен содержать всё
+        }
+
+        var matchingChildren = new ObservableCollection<FileSystemModel>();
+
+        if (node.Children != null)
+        {
+            foreach (var child in node.Children)
+            {
+                var filtered = FilterNode(child, search);
+                if (filtered != null)
+                    matchingChildren.Add(filtered);
+            }
+        }
+
+        if (matchingChildren.Count > 0)
+        {
+            var copy = new FileSystemModel(node.Parent, node.Name, node.RawRelativePath, node.IsDirectory);
+            foreach (var child in matchingChildren)
+            {
+                copy.Children?.Add(child);
+            }
+            return copy;
+        }
+
+        return null;
+    }
+
+    private FileSystemModel DeepCopyFullSubtree(FileSystemModel node)
+    {
+        var copy = new FileSystemModel(node.Parent, node.Name, node.RawRelativePath, node.IsDirectory);
+
+        if (node.Children != null)
+        {
+            foreach (var child in node.Children)
+            {
+                copy.Children?.Add(DeepCopyFullSubtree(child));
+            }
+        }
+
+        return copy;
+    }
 }

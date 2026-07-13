@@ -974,7 +974,8 @@
                     hc:InfoElement.Placeholder="Search"
                     hc:InfoElement.ShowClearButton="True"
                     FlowDirection="LeftToRight"
-                    SearchStarted="PESearchBar_OnSearchStarted" />
+                    SearchStarted="PESearchBar_OnSearchStarted"
+                    TextChanged="PESearchBar_TextChanged"/>
 
                 <StackPanel
                     Grid.Row="1"
@@ -1069,6 +1070,74 @@
                                            ElementName=ToggleFlatModeButton,
                                            Converter={StaticResource TreeFlatIconConverter}}" />
                     </ToggleButton>
+
+                    <!-- Search Mode Toggle (Live / Regular) with smooth animation -->
+                    <ToggleButton
+                        x:Name="SearchModeToggle"
+                        Height="Auto"
+                        Margin="{DynamicResource WolvenKitMarginTinyLeft}"
+                        Padding="0"
+                        hc:VisualElement.HighlightBackground="{StaticResource WolvenKitRed}"
+                        IsChecked="True"
+                        ToolTip="Live Search: filter as you type&#10;Regular Search: filter only when pressing Enter"
+                        Checked="SearchModeToggle_CheckedChanged"
+                        Unchecked="SearchModeToggle_CheckedChanged">
+
+                        <ToggleButton.Style>
+                            <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="ToggleButton">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Style.Triggers>
+                                    <!-- Checked state -->
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource WolvenKitRed}" />
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation 
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        From="0.4" To="1.0" 
+                                                        Duration="0:0:0.18" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+
+                                    <!-- Unchecked state -->
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation 
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        From="0.4" To="1.0" 
+                                                        Duration="0:0:0.18" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+
+                        <templates:IconBox 
+                            x:Name="SearchModeIcon"
+                            IconPack="Material"
+                            Size="{DynamicResource WolvenKitIconTiny}"
+                            Foreground="White">
+                            <templates:IconBox.Style>
+                                <Style TargetType="templates:IconBox">
+                                    <Setter Property="Kind" Value="Flash" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType=ToggleButton}}" Value="False">
+                                            <Setter Property="Kind" Value="KeyboardReturn" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </templates:IconBox.Style>
+                        </templates:IconBox>
+                    </ToggleButton>
+
                 </StackPanel>
 
                 <StackPanel
