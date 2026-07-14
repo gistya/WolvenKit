@@ -320,16 +320,16 @@ public class WatcherServiceTests : IDisposable
                 File.WriteAllText(dest, "dummy redengine file for logging test");
         }
 
-        var countBeforeBatch = _watcher.FileList.Count;
-
         // Act - trigger the bypass import path
         _projectEvents.PublishFilesImported(new FilesImportedMessage.GameFiles(fakeFiles));
 
-        // Assert using model state instead of log messages (more robust)
-        await WaitForFileListCountAsync(countBeforeBatch + fileCount, TimeSpan.FromSeconds(10));
+        // Assert on the number of FILE nodes, which is deterministic: exactly the 250 imported files
+        // (deduped by path). A total-count delta is not reliable here — it's thrown off by the directory
+        // scaffolding AND by the async project load racing the on-disk writes above, which inflates any
+        // pre-batch snapshot and made the old `countBeforeBatch + fileCount` target unreachable.
+        await WaitForFileListCountAsync(fileCount, TimeSpan.FromSeconds(10), m => !m.IsDirectory);
 
-        Assert.True(_watcher.FileList.Count >= countBeforeBatch + fileCount,
-            $"Expected at least {countBeforeBatch + fileCount} files after large batch import");
+        Assert.Equal(fileCount, _watcher.FileList.Count(m => !m.IsDirectory));
     }
 
     [Fact]
@@ -1180,11 +1180,12 @@ public class WatcherServiceTests : IDisposable
     /// This is much more reliable than Task.Delay because updates are marshaled
     /// via DispatcherHelper.RunOnMainThread (Background priority) inside DispatchedObservableCollection.
     /// </summary>
-    private async Task WaitForFileListCountAsync(int minimumCount, TimeSpan timeout)
+    private async Task WaitForFileListCountAsync(int minimumCount, TimeSpan timeout, Func<FileSystemModel, bool>? predicate = null)
     {
         var fileList = _watcher.FileList;
+        int Count() => predicate is null ? fileList.Count : fileList.Count(predicate);
 
-        if (fileList.Count >= minimumCount)
+        if (Count() >= minimumCount)
             return;
 
         var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -1192,7 +1193,7 @@ public class WatcherServiceTests : IDisposable
         NotifyCollectionChangedEventHandler handler = null!;
         handler = (sender, e) =>
         {
-            if (fileList.Count >= minimumCount)
+            if (Count() >= minimumCount)
             {
                 fileList.CollectionChanged -= handler;
                 tcs.TrySetResult(true);
@@ -1208,7 +1209,7 @@ public class WatcherServiceTests : IDisposable
             fileList.CollectionChanged -= handler;
             tcs.TrySetException(new TimeoutException(
                 $"FileList did not reach {minimumCount} items within {timeout.TotalSeconds}s. " +
-                $"Current count: {fileList.Count}"));
+                $"Current count: {Count()}"));
         });
 
         await tcs.Task;

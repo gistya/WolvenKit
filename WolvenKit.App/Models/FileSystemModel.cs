@@ -95,6 +95,32 @@ public class FileSystemModel : INotifyPropertyChanged
         GetMetadata();
     }
 
+    /// <summary>
+    /// Creates a projection clone of <paramref name="source"/> under a (clone) <paramref name="cloneParent"/>,
+    /// COPYING the source's already-computed metadata instead of re-deriving it. The clone points at the
+    /// exact same file/folder as the source, so every derived value is identical — calling
+    /// <c>GetMetadata()</c> again would just re-run a <see cref="FileInfo"/> disk stat per file, which is
+    /// what locks the UI thread when GridGuard projects a huge batch (e.g. a 90k-file import). Kept in sync
+    /// afterwards by the same paths as any other model (UpdateFileInfo on FS "Changed", Rename on rename).
+    /// </summary>
+    internal FileSystemModel(FileSystemModel source, FileSystemModel? cloneParent)
+    {
+        Parent = cloneParent;
+        _name = source.Name;
+        RawRelativePath = source.RawRelativePath;
+        IsDirectory = source.IsDirectory;
+        _isExpanded = source.IsExpanded;
+
+        // Snapshot the derived metadata rather than recomputing it from disk.
+        FullName = source.FullName;
+        _gameRelativePath = source.GameRelativePath;
+        Hash = source.Hash;
+        HashStr = source.HashStr;
+        _extension = source.Extension;
+        _fileSize = source.FileSize;
+        _fileSizeStr = source.FileSizeStr;
+    }
+
     public void Rename(string? newName = null, bool updateChildren = true)
     {
         if (Parent == null)

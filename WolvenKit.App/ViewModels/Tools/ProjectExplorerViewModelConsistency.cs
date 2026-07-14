@@ -342,16 +342,46 @@ public sealed class GridGuard : IDisposable
         {
             lock (_projGate)
             {
+                // Build every clone for the batch first, collecting the NEW ones, then push them onto the
+                // grid-bound collections in as few notifications as possible. This is the whole point of
+                // the PR: a per-node FileList.Add fires a CollectionChanged each (the grid re-processes
+                // every one) and the old per-node FileList.Contains was O(n) → O(n^2) on a 90k-file
+                // import. Here dedup is O(1) via _cloneByKey and the grids get one AddRange each.
+                var newFlatClones = new List<FileSystemModel>(domainNodes.Count);
+                var newTreeRoots = new List<FileSystemModel>();
+                var newChildrenByParent =
+                    new Dictionary<FileSystemModel, List<FileSystemModel>>(ReferenceEqualityComparer.Instance);
+
                 foreach (var d in domainNodes)
                 {
                     try
                     {
-                        EnsureClone(d);
+                        EnsureCloneBatched(d, newFlatClones, newTreeRoots, newChildrenByParent);
                     }
                     catch
                     {
                         // Best-effort: skip a node that can't be cloned right now (e.g. file vanished).
                     }
+                }
+
+                // Wire new children into their parents (one AddRange per touched folder), then the roots
+                // and the flat list (one AddRange). Every AddRange raises a single CollectionChanged.
+                foreach (var kvp in newChildrenByParent)
+                {
+                    kvp.Key.Children.AddRange(kvp.Value);
+                }
+
+                foreach (var root in newTreeRoots)
+                {
+                    if (!FileTree.Contains(root))
+                    {
+                        FileTree.Add(root);
+                    }
+                }
+
+                if (newFlatClones.Count > 0)
+                {
+                    FileList.AddRange(newFlatClones);
                 }
             }
         });
@@ -429,7 +459,9 @@ public sealed class GridGuard : IDisposable
 
     private FileSystemModel CloneSubtree(FileSystemModel domain, FileSystemModel? cloneParent)
     {
-        var clone = new FileSystemModel(cloneParent, domain.Name, domain.RawRelativePath, domain.IsDirectory, domain.IsExpanded);
+        // Copy the domain's metadata instead of re-stat'ing every file — this runs for the whole project
+        // on load/reload, so on a huge project the redundant per-file disk stat is a major cost.
+        var clone = new FileSystemModel(domain, cloneParent);
         _cloneByKey[clone.FullName] = clone;
 
         foreach (var child in domain.Children.ToList())
@@ -450,19 +482,27 @@ public sealed class GridGuard : IDisposable
         return _invisibleCloneRoot;
     }
 
-    private FileSystemModel EnsureClone(FileSystemModel domain)
+    /// <summary>
+    /// Ensures a clone exists for <paramref name="domain"/> (creating parent clones as needed), but does
+    /// NOT touch FileTree/FileList/Children directly — newly-created clones are collected into
+    /// <paramref name="newFlatClones"/>, new visible roots into <paramref name="newTreeRoots"/>, and new
+    /// child links into <paramref name="newChildrenByParent"/>, so the caller can apply them in batches
+    /// (one AddRange each) rather than one CollectionChanged per node. Returns the (new or existing) clone.
+    /// </summary>
+    private FileSystemModel EnsureCloneBatched(
+        FileSystemModel domain,
+        List<FileSystemModel> newFlatClones,
+        List<FileSystemModel> newTreeRoots,
+        Dictionary<FileSystemModel, List<FileSystemModel>> newChildrenByParent)
     {
         if (_cloneByKey.TryGetValue(domain.FullName, out var existing))
         {
             return existing;
         }
 
-        // A node is a visible tree root when its domain parent is the invisible project root.
-        // We still create a (hidden) invisible clone parent so that GetMetadata() on the clone
-        // walks a correct base and produces *exactly* the same FullName as the domain model.
-        // This makes _cloneByKey[domain.FullName] lookups succeed and prevents creating
-        // duplicate clone instances for the same folder (the root cause of "multiple copies of
-        // the same folder" in FileTree/FileList after adds, converts, and ProjectAdd).
+        // A node is a visible tree root when its domain parent is the invisible project root. We still
+        // create a (hidden) invisible clone parent so the clone's FullName matches the domain's exactly,
+        // keeping _cloneByKey lookups reliable and preventing duplicate clones for the same folder.
         FileSystemModel? cloneParent = null;
         var dp = domain.Parent;
         if (dp is not null && dp.Name == FileSystemModel.ProjectDirName)
@@ -471,31 +511,33 @@ public sealed class GridGuard : IDisposable
         }
         else if (dp is not null)
         {
-            cloneParent = EnsureClone(dp);
+            cloneParent = EnsureCloneBatched(dp, newFlatClones, newTreeRoots, newChildrenByParent);
         }
 
-        var clone = new FileSystemModel(cloneParent, domain.Name, domain.RawRelativePath, domain.IsDirectory, domain.IsExpanded);
+        // Copy metadata from the domain node instead of re-stat'ing the file (see the clone constructor).
+        var clone = new FileSystemModel(domain, cloneParent);
         _cloneByKey[clone.FullName] = clone;
 
-        if (cloneParent is not null && !cloneParent.Children.Contains(clone))
+        // The clone is brand new, so it can't already be under cloneParent — collect the link for a single
+        // batched Children.AddRange rather than an O(n) Contains + per-item Add.
+        if (cloneParent is not null)
         {
-            cloneParent.Children.Add(clone);
+            if (!newChildrenByParent.TryGetValue(cloneParent, out var kids))
+            {
+                kids = [];
+                newChildrenByParent[cloneParent] = kids;
+            }
+
+            kids.Add(clone);
         }
 
-        bool isVisibleRoot = (dp is not null && dp.Name == FileSystemModel.ProjectDirName) || dp == null;
+        var isVisibleRoot = dp is null || dp.Name == FileSystemModel.ProjectDirName;
         if (isVisibleRoot)
         {
-            if (!FileTree.Contains(clone))
-            {
-                FileTree.Add(clone);
-            }
+            newTreeRoots.Add(clone);
         }
 
-        if (!FileList.Contains(clone))
-        {
-            FileList.Add(clone);
-        }
-
+        newFlatClones.Add(clone);
         return clone;
     }
 
