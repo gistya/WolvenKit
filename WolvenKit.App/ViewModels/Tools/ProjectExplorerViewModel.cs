@@ -215,12 +215,11 @@ public partial class ProjectExplorerViewModel : ToolViewModel
         if (ActiveProject != null)
         {
             SaveProjectState();
+            ActiveProject = null;
+            UnwatchProject();
         }
 
-        LoadExpansionStateDictionary(activeProject);
         EnableLoadingMode(isReload);
-        ActiveProject = null;
-        UnwatchProject();
 
         DispatcherHelper.DelayOnMainThread(() =>
         {
@@ -228,6 +227,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             {
                 ActiveProject = activeProject;
                 _projectWatcher.StartWatcher_AndLoadProject(activeProject);
+                LoadExpansionStateDictionary(activeProject);
             }
             catch (Exception e)
             {
