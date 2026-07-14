@@ -156,7 +156,8 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(project =>
             {
-                if (project == null)
+                var active = _appViewModel.GetToolViewModel<ProjectExplorerViewModel>().ActiveProject;
+                if (project == null || project == active)
                 {
                     return;
                 }
@@ -169,6 +170,11 @@ public partial class ProjectExplorerViewModel : ToolViewModel
                 // from becoming extremely choppy on large projects.
                 _appViewModel.RunAfterModalClosed(() =>
                 {
+                    var active = _appViewModel.GetToolViewModel<ProjectExplorerViewModel>().ActiveProject;
+                    if (project == active)
+                    {
+                        return;
+                    }
                     StartWatcher_AndLoadProject(project, isReload);
                 });
             });
