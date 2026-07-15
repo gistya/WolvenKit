@@ -7,12 +7,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -71,7 +73,6 @@ public partial class ProjectExplorerViewModel : ToolViewModel
     private readonly IGameControllerFactory _gameController;
     private readonly AppViewModel _appViewModel;
     public readonly IModifierViewStateService ModifierStateService;
-    private readonly WatcherService _projectWatcher;
     private readonly IProjectEvents _projectEvents;
 
     [ObservableProperty]
@@ -85,14 +86,10 @@ public partial class ProjectExplorerViewModel : ToolViewModel
     private CancellationTokenSource _deferredRefreshCts = new();
     private readonly ImportExportHelper _importExportHelper;
     private readonly TimeSpan _singleOperationTimeout = TimeSpan.FromSeconds(3);
-
-    // Bound to TreeGrid.ItemsSource / TreeGridFlat.ItemsSource by the View. The collections are
-    // owned by the GridGuard (the watcher mutates those same instances), so the grids' single
-    // source of truth is the guard.
-    public DispatchedObservableCollection<FileSystemModel> FileTree => _gridGuard.FileTree;
     public DispatchedObservableCollection<FileSystemModel> FileList => _gridGuard.FileList;
-    public WatcherState FileWatcherState => _projectWatcher.WatcherState;
-    public Func<CancellationToken, Task, Task>? BeginDeferredRefreshContext { get; set; }
+    public DispatchedObservableCollection<FileSystemModel> FileTree => _gridGuard.FileTree;
+
+    public Func<CancellationToken, Func<Task>, Task>? BeginDeferredRefreshContext { get; set; }
     public Dictionary<string, bool> ExpansionStateDictionary = [];
     public bool IsKeyUpEventAssigned { get; set; }
 
@@ -129,15 +126,45 @@ public partial class ProjectExplorerViewModel : ToolViewModel
         _importExportHelper = importExportHelper;
         ModifierStateService = modifierSvc;
         _projectEvents = projectEvents;
-
         _appViewModel = appViewModel;
-
-        _projectWatcher = new WatcherService(GetDesiredExpansionState, loggerService, projectEvents, _gridGuard);
-
         SideInDockedMode = DockSide.Left;
-
         IsShowRelativePath = true;
         ModifierStateService.ModifierStateChanged += OnModifierUpdateEvent;
+        _loggerService = loggerService;
+        _getDesiredExpansionState = GetDesiredExpansionState;
+
+        _modsWatcher = new FileSystemWatcher
+        {
+            Filter = "*",
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Attributes | NotifyFilters.DirectoryName,
+            IncludeSubdirectories = true
+        };
+        _modsWatcher.Created += OnChanged;
+        _modsWatcher.Changed += OnChanged;
+        _modsWatcher.Deleted += OnChanged;
+        _modsWatcher.Renamed += OnRenamed;
+
+        // Capture the UI dispatcher now (this ctor runs on the UI thread). Prefer the application's
+        // dispatcher when available and fall back to the current thread's so this also works in
+        // headless/STA test hosts where Application.Current may be null.
+        var uiDispatcher = System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+
+        _projectEventScheduler = new MainThreadInlineScheduler(RxApp.MainThreadScheduler, uiDispatcher);
+
+        projectEvents.FilesImported
+            .ObserveOn(_projectEventScheduler)
+            .Subscribe(OnFilesImported)
+            .DisposeWith(_disposables);
+
+        projectEvents.FilesMoved
+            .ObserveOn(_projectEventScheduler)
+            .Subscribe(async (msg) => await OnFilesMoved(msg))
+            .DisposeWith(_disposables);
+
+        projectEvents.FilesDeleted
+            .ObserveOn(_projectEventScheduler)
+            .Subscribe((msg) => OnFilesOrDirectoriesDeleted(msg))
+            .DisposeWith(_disposables);
 
         SetupToolDefaults();
 
@@ -201,7 +228,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
     /// </summary>
     /// <param name="activeProject"></param>
     /// <param name="isReload"></param>
-    public void StartWatcher_AndLoadProject(Cp77Project activeProject, bool isReload)
+    void StartWatcher_AndLoadProject(Cp77Project activeProject, bool isReload)
     {
         _gridGuard.NotifyChangeRequested();
         _gridGuard.BeginChanges();
@@ -226,7 +253,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             try
             {
                 ActiveProject = activeProject;
-                _projectWatcher.StartWatcher_AndLoadProject(activeProject);
+                _StartWatcher_AndLoadProject(activeProject);
                 LoadExpansionStateDictionary(activeProject);
             }
             catch (Exception e)
@@ -265,7 +292,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             DisableLoadingMode
         );
 
-        _projectWatcher.CompletionTimer = _loadingCompletion;
+        CompletionTimer = _loadingCompletion;
         OnSetLoading?.Invoke(this, (true, isReload));
     }
 
@@ -845,39 +872,9 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             }
         }
 
-        _deferredRefreshCts = new CancellationTokenSource();
-
-        if (BeginDeferredRefreshContext == null)
-        {
-            if (TestHelper.InActiveTest)
-            {
-                _projectWatcher.RemoveItems(selected);
-            }
-            else
-            {
-                _projectWatcher.RemoveItems(selected);
-            }
-
-            return;
-        }
-
-        var cts = _deferredRefreshCts;
-
-        await BeginDeferredRefreshContext(
-            cts.Token,
-            Task.Run(() =>
-            {
-                try
-                {
-                    _projectWatcher.RemoveItems(selected);
-                }
-                finally
-                {
-                    cts.Cancel();
-                    cts.Dispose();
-                    ResumeFileWatcher();
-                }
-            }));
+        SuspendFileWatcher();
+        await RefreshAfter(() => RemoveItems(selected));
+        ResumeFileWatcher();
     }
 
     /// <summary>
@@ -1024,20 +1021,9 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             return;
         }
 
-        _deferredRefreshCts = new CancellationTokenSource();
-        var token = _deferredRefreshCts.Token;
-
-        await BeginDeferredRefreshContext!(
-            token,
-            InternalRenameFile(gameRelativePath, newGameRelativePath, prefixPath, refactor)
-        );
-
-        _gridGuard.ConfirmRedrawComplete();
-
-        if (_gridGuard.GridsLocked)
-        {
-            throw new WolvenKitException(352345, "Internal inconsistency found. Please quit and restart the app.");
-        }
+        SuspendFileWatcher();
+        await RefreshAfter(() =>  InternalRenameFile(gameRelativePath, newGameRelativePath, prefixPath, refactor));
+        ResumeFileWatcher();
     }
 
     // add sanitizer to ensure moves can't cross file scope boundary
@@ -1054,7 +1040,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
     /// <param name="refactor"></param>
     private async Task InternalRenameFile(string gameRelativePath, string newGameRelativePath, string prefixPath, bool refactor)
     {
-        SuspendFileWatcher();
+        // SuspendFileWatcher();
 
         try
         {
@@ -1064,13 +1050,13 @@ public partial class ProjectExplorerViewModel : ToolViewModel
         finally
         {
             try { await _deferredRefreshCts.CancelAsync(); } catch { /* token may already be gone */ }
-            ResumeFileWatcher();
+            // ResumeFileWatcher();
         }
     }
 
     public void ResumeFileWatcher()
     {
-        _projectWatcher.Resume();
+        _Resume();
         // The watcher is live again, so the grids are back to a safe, mutable state. ForceReady is a
         // no-op if we were already Ready, so calling it here can never strand the guard.
         _gridGuard.ForceReady();
@@ -1102,9 +1088,9 @@ public partial class ProjectExplorerViewModel : ToolViewModel
         _projectEvents.PublishFilesMoved(new FilesMovedMessage(payload));
     }
 
-    public void UnwatchProject() => _projectWatcher.UnwatchProject();
+    public void UnwatchProject() => _UnwatchProject();
 
-    public void CloseProject() => _projectWatcher.UnwatchProject();
+    public void CloseProject() => _UnwatchProject();
 
     #endregion general commands
 
@@ -1152,21 +1138,9 @@ public partial class ProjectExplorerViewModel : ToolViewModel
 
         if (!IsShiftKeyPressed)
         {
-            _deferredRefreshCts = new CancellationTokenSource();
-
-            if (BeginDeferredRefreshContext == null)
-            {
-                if (TestHelper.InActiveTest)
-                {
-                    await ConvertToJsonInternal(selection);
-                    return;
-                }
-
-                throw new Exception("Rendering context does not exist.");
-            }
-
-            await BeginDeferredRefreshContext(_deferredRefreshCts.Token, ConvertToJsonInternal(selection));
-
+            SuspendFileWatcher();
+            await RefreshAfter(() => ConvertToJsonInternal(selection));
+            ResumeFileWatcher();
             return;
         }
 
@@ -1178,32 +1152,13 @@ public partial class ProjectExplorerViewModel : ToolViewModel
         var convertSelection = FileList
             .Where(x => selectedItemPaths.Contains(x.FullName) && File.Exists(x.FullName)).ToList();
 
-        _deferredRefreshCts = new CancellationTokenSource();
-
-        if (BeginDeferredRefreshContext == null)
-        {
-            throw new Exception("Rendering context does not exist.");
-        }
-
-        try
-        {
-            await BeginDeferredRefreshContext(_deferredRefreshCts.Token, ConvertToJsonInternal(convertSelection));
-        }
-        catch (WolvenKitException e)
-        {
-            _loggerService.Error($"Exception when converting to JSON: ${e}");
-        }
-        finally
-        {
-            _deferredRefreshCts.Cancel();
-            _deferredRefreshCts.Dispose();
-        }
+        SuspendFileWatcher();
+        await RefreshAfter(() => ConvertToJsonInternal(convertSelection));
+        ResumeFileWatcher();
     }
 
     private async Task ConvertToJsonInternal(IEnumerable<FileSystemModel> selection)
     {
-        SuspendFileWatcher();
-
         await Task.Run(async () =>
         {
             var allFiles = selection
@@ -1274,7 +1229,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
                             {
                                 var jsonFileInfo = new FileInfo(jsonFilePath);
 
-                                if (_projectWatcher.FileLookup.ContainsKey(jsonFilePath))
+                                if (FileLookup.ContainsKey(jsonFilePath))
                                 {
                                     // don't add a duplicate file to the trees
                                     return;
@@ -1309,13 +1264,6 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             }
             catch { /* best effort for tests/headless */ }
         });
-
-        await _deferredRefreshCts.CancelAsync();
-        _deferredRefreshCts.Dispose();
-
-        // Pair the SuspendFileWatcher (which locked the guard) with resume + force back to Ready.
-        // This prevents the guard from being stranded in MakingChangesToFiles after a convert.
-        ResumeFileWatcher();
     }
 
     /// <summary>
@@ -1719,34 +1667,10 @@ public partial class ProjectExplorerViewModel : ToolViewModel
     {
         if (!IsShiftKeyPressed)
         {
-            _deferredRefreshCts = new CancellationTokenSource();
-            if (BeginDeferredRefreshContext == null)
-            {
-                throw new Exception("Rendering context does not exist.");
-            }
-
-            _gridGuard.BeginChanges();
-
-            try
-            {
-                _loggerService?.Debug("Beginning deferred refresh context for JSON to file conversion.");
-                await BeginDeferredRefreshContext(
-                    _deferredRefreshCts.Token,
-                    ConvertFromJsonInternal(SelectedItems!.OfType<FileSystemModel>().Where(IsInRawFolder))
-                );
-            }
-            catch (WolvenKitException e)
-            {
-                _loggerService?.Error(4534534, $"Exception when refreshing after converting raw file: ${e.Message}");
-            }
-            finally
-            {
-                _deferredRefreshCts.Cancel();
-                _deferredRefreshCts.Dispose();
-                _gridGuard.ConfirmChangesMade();
-                _gridGuard.ConfirmRedrawComplete();
-            }
-
+            var items = SelectedItems!.OfType<FileSystemModel>().Where(IsInRawFolder);
+            SuspendFileWatcher();
+            await RefreshAfter(() => ConvertFromJsonInternal(items));
+            ResumeFileWatcher();
             return;
         }
 
@@ -1757,37 +1681,13 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             .Where(IsInArchiveFolder)
             .Where(x => selectedItemPaths.Contains(x.GameRelativePath)).ToList();
 
-        _deferredRefreshCts = new CancellationTokenSource();
-        if (BeginDeferredRefreshContext == null)
-        {
-            throw new Exception("Rendering context does not exist.");
-        }
-
-        try
-        {
-            _gridGuard.BeginChanges();
-
-            await BeginDeferredRefreshContext(
-                _deferredRefreshCts.Token,
-                ConvertFromJsonInternal(convertSelection)
-            );
-        }
-        catch (WolvenKitException e)
-        {
-            _loggerService?.Error(4534534, $"Exception when refreshing after converting raw file: ${e.Message}");
-        }
-        finally
-        {
-            _deferredRefreshCts.Cancel();
-            _deferredRefreshCts.Dispose();
-        }
+        SuspendFileWatcher();
+        await RefreshAfter(() => ConvertFromJsonInternal(convertSelection));
+        ResumeFileWatcher();
     }
 
-    // TODO: Refactor this method to use PublishFilesImported rather than relying on WatcherService.
     private async Task ConvertFromJsonInternal(IEnumerable<FileSystemModel> selection)
     {
-        _projectWatcher.Resume();
-
         var progress = 0;
         _progressService.Report(0);
 
@@ -1806,19 +1706,36 @@ public partial class ProjectExplorerViewModel : ToolViewModel
             }
         }
 
+        List<FileInfo> fileInfos = new();
+
         // convert files
         foreach (var file in files)
         {
-            await ConvertFromJsonAsync(file);
+            try
+            {
+                await ConvertFromJsonAsync(file);
+                fileInfos.Add(new FileInfo(file));
+            }
+            catch (JsonException err)
+            {
+                if (err.Message.Contains(" | LineNumber"))
+                {
+                    _loggerService.Error($"Failed to parse JSON in {file}.");
+                    _loggerService.Error($"The error is in LineNumber{err.Message.Split(" | LineNumber").LastOrDefault()}");
+                }
+                else
+                {
+                    _loggerService.Error($"Something went _really_ wrong when trying to parse {file}:");
+                    throw;
+                }
+            }
 
             progress++;
             _progressService.Report(progress / (float)files.Count);
         }
 
+        _projectEvents.PublishFilesImported(new FilesImportedMessage.RawFiles(fileInfos));
         _progressService.Completed();
-
-        // Ensure guard is back to Ready (in case this path was entered while locked).
-        _gridGuard.ForceReady();
     }
 
     private async Task ConvertFromJsonAsync(string file)
@@ -1841,25 +1758,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
         }
 
         Directory.CreateDirectory(outDirectoryPath);
-
-        try
-        {
-            await _modTools.ConvertFromJsonAndWriteAsync(new FileInfo(file), new DirectoryInfo(outDirectoryPath));
-        }
-        catch (JsonException err)
-        {
-            if (err.Message.Contains(" | LineNumber"))
-            {
-                _loggerService.Error($"Failed to parse JSON in {file}.");
-                _loggerService.Error($"The error is in LineNumber{err.Message.Split(" | LineNumber").LastOrDefault()}");
-            }
-            else
-            {
-                _loggerService.Error($"Something went _really_ wrong when trying to parse {file}:");
-                throw;
-            }
-        }
-
+        await _modTools.ConvertFromJsonAndWriteAsync(new FileInfo(file), new DirectoryInfo(outDirectoryPath));
         _appViewModel.ReloadChangedFiles();
 
     }
@@ -2196,7 +2095,7 @@ public partial class ProjectExplorerViewModel : ToolViewModel
 
         try
         {
-            _projectWatcher.Suspend();
+            Suspend();
             // Suspending the watcher means a high-level operation is about to mutate files behind the
             // grids. Move the guard into MakingChangesToFiles so GridsLocked is true for the duration;
             // ResumeFileWatcher (or the next load) walks it back to Ready.
