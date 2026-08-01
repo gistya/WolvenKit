@@ -69,7 +69,13 @@ namespace WolvenKit.App.ViewModels.Documents
             var gameController = Locator.Current.GetService<IGameControllerFactory>() ?? throw new ArgumentNullException(nameof(IGameControllerFactory));
             RedTypeTemplateService = Locator.Current.GetService<RedTypeTemplateService>() ?? throw new ArgumentNullException(nameof(RedTypeTemplateService));
 
+            var ctorSw = System.Diagnostics.Stopwatch.StartNew();
+            var phaseSw = System.Diagnostics.Stopwatch.StartNew();
+
             RDTViewModel = new RDTDataViewModel(data, parent, appViewModel, chunkViewmodelFactory, settingsManager, gameController);
+
+            var rdtMs = phaseSw.ElapsedMilliseconds;
+            phaseSw.Restart();
 
             // Create MainGraph - handle cases where graph might be null
             try
@@ -103,10 +109,16 @@ namespace WolvenKit.App.ViewModels.Documents
                 MainGraph.DocumentViewModel = parent;
             }
 
+            var graphMs = phaseSw.ElapsedMilliseconds;
+            phaseSw.Restart();
+
             // Initialize navigation history with the main graph
             History.Add(MainGraph);
 
             CreateTabs();
+
+            var tabsMs = phaseSw.ElapsedMilliseconds;
+            phaseSw.Restart();
 
             // Set the first tab as selected
             SelectedTab = Tabs.FirstOrDefault();
@@ -115,6 +127,11 @@ namespace WolvenKit.App.ViewModels.Documents
             {
                 UpdateTabContent(SelectedTab);
             }
+
+            Console.WriteLine(
+                $"[GraphPerf] '{parent.Header}' view model ctor {ctorSw.ElapsedMilliseconds}ms " +
+                $"(rdtDataViewModel={rdtMs}ms generateGraph={graphMs}ms createTabs={tabsMs}ms " +
+                $"updateTabContent={phaseSw.ElapsedMilliseconds}ms)");
         }
 
         public void SetGraphLoaded()

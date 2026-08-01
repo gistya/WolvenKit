@@ -75,7 +75,6 @@ namespace WolvenKit
                 _loggerService.Info("Registering themes...");
                 var themeSettings = BuildTheme(_settingsManager);
                 SfSkinManager.RegisterThemeSettings("MaterialDark", themeSettings);
-                SfSkinManager.ApplyStylesOnApplication = true;
                 _loggerService.Info("Themes registered successfully.");
             }
             catch (WolvenKitException ex)
@@ -230,7 +229,6 @@ namespace WolvenKit
             var themeSettings = BuildTheme(settingsManager);
 
             SfSkinManager.RegisterThemeSettings("MaterialDark", themeSettings);
-            SfSkinManager.ApplyStylesOnApplication = true;
             SfSkinManager.SetTheme(window, new Theme("MaterialDark"));
             window.InvalidateVisual();
             window.UpdateLayout();

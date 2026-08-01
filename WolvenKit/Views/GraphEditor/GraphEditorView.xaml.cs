@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Nodify;
+using Syncfusion.SfSkinManager;
 using ReactiveUI;
 using Splat;
 using WolvenKit.App.Services;
@@ -66,10 +67,75 @@ public partial class GraphEditorView : UserControl
             return;
         }
 
+        // [GraphPerf] Timed end-to-end from Source being set to the ContextIdle callback below.
+        var sourceSetSw = System.Diagnostics.Stopwatch.StartNew();
+
+        // Probes to localize where that window actually goes. Each fires when the dispatcher
+        // reaches that priority: if the high-priority ones are already late, the dispatcher is
+        // saturated by work queued elsewhere rather than by this control rendering. Render/Loaded
+        // being the late ones instead points at layout/realization of the node visuals.
+        foreach (var priority in new[]
+                 {
+                     DispatcherPriority.Send, DispatcherPriority.Normal, DispatcherPriority.DataBind,
+                     DispatcherPriority.Render, DispatcherPriority.Loaded, DispatcherPriority.Background
+                 })
+        {
+            var captured = priority;
+            view.Dispatcher.BeginInvoke(new Action(() =>
+                Console.WriteLine(
+                    $"[GraphPerf]   dispatcher reached {captured} at {sourceSetSw.ElapsedMilliseconds}ms")), captured);
+        }
+
+        // Container generation for the node canvas specifically.
+        if (view.Editor?.ItemContainerGenerator is { } generator)
+        {
+            void OnStatusChanged(object s, EventArgs a)
+            {
+                Console.WriteLine(
+                    $"[GraphPerf]   containers {generator.Status} at {sourceSetSw.ElapsedMilliseconds}ms");
+
+                if (generator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+                {
+                    generator.StatusChanged -= OnStatusChanged;
+                }
+            }
+
+            generator.StatusChanged += OnStatusChanged;
+        }
+
+        if (view.Editor is { } editor)
+        {
+            void OnFirstLayout(object s, EventArgs a)
+            {
+                editor.LayoutUpdated -= OnFirstLayout;
+                Console.WriteLine(
+                    $"[GraphPerf]   first LayoutUpdated at {sourceSetSw.ElapsedMilliseconds}ms");
+            }
+
+            editor.LayoutUpdated += OnFirstLayout;
+        }
+
         view.Dispatcher.BeginInvoke(new Action(() =>
         {
+            var bindAndRealizeMs = sourceSetSw.ElapsedMilliseconds;
+            var stateLoadSw = System.Diagnostics.Stopwatch.StartNew();
+
             UpdateView(view);
             //view.Source?.ArrangeNodes();
+
+            var stateLoadMs = stateLoadSw.ElapsedMilliseconds;
+            var title = view.Source?.Title ?? "<null>";
+            var itemCount = view.Source?.CanvasItems.Count ?? 0;
+
+            // Once this fires the dispatcher has drained everything queued by the state load, so
+            // it captures the re-layout / re-render triggered by moving every node.
+            view.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Console.WriteLine(
+                    $"[GraphPerf] '{title}' UI total {sourceSetSw.ElapsedMilliseconds}ms " +
+                    $"(canvasItems={itemCount} | bind+realize={bindAndRealizeMs}ms " +
+                    $"stateLoad={stateLoadMs}ms settle={sourceSetSw.ElapsedMilliseconds - bindAndRealizeMs - stateLoadMs}ms)");
+            }), DispatcherPriority.ApplicationIdle);
         }), DispatcherPriority.ContextIdle);
     }
 
@@ -147,6 +213,24 @@ public partial class GraphEditorView : UserControl
     public GraphEditorView()
     {
         InitializeComponent();
+
+        // Opt the node canvas out of SfSkinManager theming.
+        //
+        // SfSkinManager.ThemeProperty is an attached DP registered with
+        // FrameworkPropertyMetadataOptions.Inherits, so its OnThemeChanged callback fires for
+        // EVERY FrameworkElement added anywhere beneath a themed root. Elements built during
+        // template inflation are not yet initialized, so the callback takes its synchronous
+        // branch and runs inline inside the measure pass - per element, uncached.
+        //
+        // A graph with a few hundred nodes multiplies that by the whole node template subtree,
+        // inside Nodify's MeasureOverride. On q306_cmbt_public_revisited (320 nodes) it cost
+        // ~45s of a ~52s open; scoping it out took the same file to ~7s.
+        //
+        // Nothing under Views/GraphEditor uses a single Syncfusion control, so that work was pure
+        // overhead. Scoped to the canvas rather than the whole view so the surrounding chrome -
+        // toolbars, panels, and the context menus (which live in their own popup trees) - keeps
+        // full theming.
+        SfSkinManager.SetTheme(Editor, new Theme("Default"));
 
         _appViewModel = Locator.Current.GetService<AppViewModel>();
 
